@@ -1,0 +1,71 @@
+{
+  "name": "compositjs",
+  "version": "0.0.1",
+  "description": "Composing services gateway",
+  "author": "rahulrkr@hotmail.com",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/compositjs/compositjs.git"
+  },
+  "engines": {
+    "node": ">= 6.9.1",
+    "npm": "3.10.10"
+  },
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon --signal SIGINT -L -w index.js -w src -w lib -e js,json -x npm run start",
+    "start:local": "npm start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@loopback/context": "^1.10.0",
+    "async": "^2.6.2",
+    "cookie": "^0.3.1",
+    "debug": "^4.1.1",
+    "got": "^9.6.0",
+    "http-errors": "^1.7.2",
+    "hystrixjs": "^0.2.0",
+    "koa": "^2.7.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-compose": "^4.1.0",
+    "koa-cors": "^0.0.16",
+    "lodash": "^4.17.11",
+    "openapi-default-setter": "^2.0.4",
+    "openapi-request-coercer": "^2.3.0",
+    "openapi-request-validator": "^3.7.0",
+    "path-to-regexp": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "5.16.0",
+    "eslint-config-airbnb-base": "13.1.0",
+    "eslint-plugin-import": "2.16.0",
+    "nodemon": "^1.18.11",
+    "pre-commit": "1.2.2"
+  },
+  "jest": {
+    "clearMocks": true,
+    "collectCoverage": true,
+    "coverageDirectory": "build/coverage",
+    "coveragePathIgnorePatterns": [
+      "/build/",
+      "/docs/",
+      "/jest/",
+      "/mock-data/",
+      "/node_modules/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 75,
+        "functions": 90,
+        "lines": 90,
+        "statements": 90
+      }
+    },
+    "moduleDirectories": [
+      "node_modules",
+      "."
+    ],
+    "setupTestFrameworkScriptFile": "./jest/reporterConfig.js"
+  }
+}

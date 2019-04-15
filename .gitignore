@@ -1,0 +1,12 @@
+node_modules/
+*.log
+.env
+private/
+.DS_Store
+coverage
+build
+/.vscode
+certs/
+.idea
+.npmrc
+examples
