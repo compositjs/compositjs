@@ -1,6 +1,6 @@
 {
   "name": "compositjs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Composing services gateway",
   "author": "rahulrkr@hotmail.com",
   "main": "index.js",
