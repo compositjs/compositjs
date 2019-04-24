@@ -16,11 +16,13 @@
     "start": "node .",
     "dev": "nodemon --signal SIGINT -L -w index.js -w src -w lib -e js,json -x npm run start",
     "start:local": "npm start",
-    "test": "jest"
+    "test": "jest",
+    "run-dev": "SERVICE_ENDPOINT=http://localhost:3011 && node ./examples/sample-01/index.js"
   },
   "dependencies": {
     "@loopback/context": "^1.10.0",
     "async": "^2.6.2",
+    "confidence": "^4.0.1",
     "cookie": "^0.3.1",
     "debug": "^4.1.1",
     "got": "^9.6.0",
