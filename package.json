@@ -1,7 +1,7 @@
 {
   "name": "compositjs",
   "version": "0.0.2",
-  "description": "Composing services gateway",
+  "description": "Composing services",
   "author": "rahulrkr@hotmail.com",
   "main": "index.js",
   "repository": {
@@ -13,14 +13,10 @@
     "npm": "3.10.10"
   },
   "scripts": {
-    "start": "node .",
-    "dev": "nodemon --signal SIGINT -L -w index.js -w src -w lib -e js,json -x npm run start",
-    "start:local": "npm start",
-    "test": "jest",
-    "run-dev": "SERVICE_ENDPOINT=http://localhost:3011 && node ./examples/sample-01/index.js"
+    "test": "jest"
   },
   "dependencies": {
-    "@loopback/context": "^1.10.0",
+    "@loopback/context": "^1.12.0",
     "async": "^2.6.2",
     "confidence": "^4.0.1",
     "cookie": "^0.3.1",
@@ -29,9 +25,6 @@
     "http-errors": "^1.7.2",
     "hystrixjs": "^0.2.0",
     "koa": "^2.7.0",
-    "koa-bodyparser": "^4.2.1",
-    "koa-compose": "^4.1.0",
-    "koa-cors": "^0.0.16",
     "lodash": "^4.17.11",
     "openapi-default-setter": "^2.0.4",
     "openapi-request-coercer": "^2.3.0",
