@@ -2,7 +2,11 @@
   "docs": {
     "Overview": [
       "overview", 
-      "getting-started"
+      "getting-started",
+      "configuration"
+    ],
+    "Routes": [
+      "route-definitions"
     ]
   }
 }

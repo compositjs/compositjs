@@ -4,4 +4,4 @@ title: Overview
 sidebar_label: Overview
 ---
 
-Composit JS is a micro-framework tool for service orchestration which developed in Node JS.
+Composit JS is a micro service application for service orchestration in microservice world, which is developed in Node JS. 
