@@ -13,7 +13,9 @@
     "npm": "3.10.10"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint lib/**/*.js",
+    "lint:fix": "eslint lib/**/*.js --fix"
   },
   "dependencies": {
     "@loopback/context": "^1.12.0",
@@ -32,9 +34,9 @@
     "path-to-regexp": "^3.0.0"
   },
   "devDependencies": {
-    "eslint": "5.16.0",
-    "eslint-config-airbnb-base": "13.1.0",
-    "eslint-plugin-import": "2.16.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.16.0",
     "nodemon": "^1.18.11",
     "pre-commit": "1.2.2"
   },
