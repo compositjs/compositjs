@@ -35,9 +35,12 @@
     "rxjs": "^5.0.0"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
+    "mocha": "^6.1.4",
     "nodemon": "^1.18.11",
     "pre-commit": "1.2.2"
   },
