@@ -14,6 +14,8 @@ Composit JS will read and initialize the routes when the application booting pha
 
 ```js
 
+const Application = require('compositjs');
+
 const config = {
   ...,
   ...,
@@ -24,9 +26,22 @@ const config = {
   ...
 };
 
-const application = new Application(config);
+(async () => {
 
-await application.start();
+  try {
+  
+    const application = new Application(config);
+    
+    // Starting application
+    await application.start();
+    console.log(`application started ${application.server.port()  }`);
+  
+  } catch (err) {
+    console.error('Cannot start the application.', err);
+    process.exit(1);
+  }
+
+})();
 
 ```
 

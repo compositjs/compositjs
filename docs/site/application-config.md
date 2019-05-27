@@ -8,6 +8,8 @@ You can configure the composit JS by passing it to application instance.
 
 ```js
 
+const Application = require('compositjs');
+
 const config = {
   server: {
     port: 8001,
@@ -16,9 +18,13 @@ const config = {
   appRoot: __dirname
 };
 
-const application = new Application(config);
+(async () => {
 
-await application.start();
+  const application = new Application(config);
+
+  await application.start();
+
+})();
 
 ```
 
