@@ -2,8 +2,10 @@
   "docs": {
     "Overview": [
       "overview", 
-      "getting-started",
-      "configuration"
+      "getting-started"
+    ],
+    "Keys": [
+      "application"
     ],
     "Routes": [
       "route-definitions"

@@ -45,7 +45,7 @@ const config = {
 
 ```
 
-For more information about the application configuration, please read [here](application-config.md).
+For more information about the application configuration, please read [here](application.md#applicationConfiguration).
 
 Route definitons should have below four sections:
 
