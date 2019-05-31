@@ -13,7 +13,6 @@ Definitions should define in JSON format and save file inside `/definitions/rout
 Composit JS will read and initialize the routes when the application booting phase. You can able to configure the file extension and directory path of route definitions through application configuration.
 
 ```js
-
 const Application = require('compositjs');
 
 const config = {
@@ -42,7 +41,6 @@ const config = {
   }
 
 })();
-
 ```
 
 For more information about the application configuration, please read [here](application.md#applicationConfiguration).

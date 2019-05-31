@@ -11,7 +11,6 @@ sidebar_label: Application
 Composit JS can be configure using constructor arguments to application instance.
 
 ```js
-
 const Application = require('compositjs');
 
 const config = {
@@ -29,7 +28,6 @@ const config = {
   await application.start();
 
 })();
-
 ```
 
 |Options     | Type    |  Description                                    |

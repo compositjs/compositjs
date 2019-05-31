@@ -4,11 +4,11 @@ title: Output
 sidebar_label: Output
 ---
 
-Output define response after the execution of services in route definitions. It contains the information of output format and composit JS will respond to the client based on the configuration.
+`output` define the response format after the execution of services in route definitions. It contains the information of output format and composit JS will respond to the client based on the configuration.
 
 Sample `output` format:
 
-```js
+```json
 {
   "info": {
     ....
@@ -30,7 +30,7 @@ Sample `output` format:
 
 |Options     | Type    |  Description                                                                                     |
 |------------|---------|--------------------------------------------------------------------------------------------------|
-| `stategy`  | string  | Required. Define output strategy. Please [click here]](#outputStrategies) more about strategies. |
+| `stategy`  | string  | Required. Define output strategy. Please [click here](#outputStrategies) more about strategies. |
 | `services` | array   | Optinal. List of service names.    |
 | `headers`  | object  | Optinal. Response header information.    |
 | `cookies`  | object  | Optinal. Define cookies and which will added to `set-cookie` option of header.    |
@@ -44,7 +44,7 @@ Sample `output` format:
 
 e.g: 
 
-```js
+```json
 // route-definition
 {
   "info": {
@@ -70,13 +70,13 @@ e.g:
 
 for the above route-definition, response will be:
 
-```js
+```json
 {
   "service-name": {
     // response body of `service-01`
   },
   "service-name-02": {
-    // response body of `service-01`
+    // response body of `service-02`
   }
 }
 ```
@@ -87,7 +87,7 @@ for the above route-definition, response will be:
 
 **Note:** for `redirect` strategy header `location` must be there.
 
-```js
+```json
 // route-definition
 {
   "info": {

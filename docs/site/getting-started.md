@@ -37,7 +37,6 @@ const config = {
 
   await application.start();
 })();
-
 ```
 
 #### Step 3:

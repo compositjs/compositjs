@@ -10,7 +10,7 @@ If a route is selected for the execution, then the composit JS will select every
 
 Sample `services` format:
 
-```js
+```json
 {
   "info": {
     ....
