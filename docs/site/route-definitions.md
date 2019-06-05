@@ -13,7 +13,6 @@ Definitions should define in JSON format and save file inside `/definitions/rout
 Composit JS will read and initialize the routes when the application booting phase. You can able to configure the file extension and directory path of route definitions through application configuration.
 
 ```js
-
 const Application = require('compositjs');
 
 const config = {
@@ -42,10 +41,9 @@ const config = {
   }
 
 })();
-
 ```
 
-For more information about the application configuration, please read [here](application-config.md).
+For more information about the application configuration, please read [here](application.md#applicationConfiguration).
 
 Route definitons should have below four sections:
 
@@ -64,8 +62,8 @@ In this section, contains the information for endpoint request e.g. host, path e
 
 ## services
 
-In this section, contains the information of services to be executed when the request identifies this route. Multiple services can be defined in single route and composit JS support multi-level services also.
+In this section, contains the list of services to be executed when the request identifies the route. Multiple services can be defined for a single route and composit JS support multi-level services also. For more please read [here](services-route-definition.md).
 
 ## output
 
-In this section, contains the information of output format from the route. Once all services executed, composit JS will respond to the client based on the information from output section.
+In this section, contains the information of output format from the route. Once all services executed, composit JS will respond to the client based on the information from output section. For more please read [here](output.md).

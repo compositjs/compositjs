@@ -2,11 +2,15 @@
   "docs": {
     "Overview": [
       "overview", 
-      "getting-started",
-      "configuration"
+      "getting-started"
+    ],
+    "Keys": [
+      "application"
     ],
     "Routes": [
-      "route-definitions"
+      "route-definitions",
+      "services-route-definition",
+      "output"
     ]
   }
 }
