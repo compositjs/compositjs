@@ -31,12 +31,39 @@ Sample `output` format:
 |Options     | Type    |  Description                                                                                     |
 |------------|---------|--------------------------------------------------------------------------------------------------|
 | `stategy`  | string  | Required. Define output strategy. Please [click here](#outputStrategies) more about strategies. |
-| `services` | array   | Optinal. List of service names.    |
+| `services` | array   | Optinal. List of service names to be added with response.    |
 | `headers`  | object  | Optinal. Response header information.    |
 | `cookies`  | object  | Optinal. Define cookies and which will added to `set-cookie` option of header.    |
 
 
 ### <a name="outputStrategies"></a> Output Strategies
+
+### standard
+
+`standard` strategy will respond output of the service body.
+
+e.g: 
+
+```json
+// route-definition
+{
+  "info": {
+    ....
+  },
+  "definition": {
+    ...
+  },
+  "services": [{
+    "id": "service-01"
+  }],
+  "output": {
+    "strategy": "standard",
+    "service": "service-01"
+  }
+}
+```
+
+***Note:*** In `standard` strategy, `service` is mandatory.
 
 #### composit
 

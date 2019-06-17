@@ -1,6 +1,6 @@
 {
   "name": "compositjs",
-  "version": "0.0.5",
+  "version": "0.0.6-alpha-01",
   "description": "Composing services",
   "author": "rahulrkr@hotmail.com",
   "main": "index.js",
@@ -18,9 +18,9 @@
     "lint:fix": "eslint lib/**/*.js --fix"
   },
   "dependencies": {
-    "@loopback/context": "^1.12.0",
+    "@loopback/context": "^1.18.0",
     "async": "^2.6.2",
-    "confidence": "^4.0.1",
+    "confidence": "^4.0.2",
     "cookie": "^0.3.1",
     "debug": "^4.1.1",
     "got": "^9.6.0",
@@ -30,18 +30,19 @@
     "lodash": "^4.17.11",
     "openapi-default-setter": "^2.0.4",
     "openapi-request-coercer": "^2.3.0",
-    "openapi-request-validator": "^3.7.0",
+    "openapi-request-validator": "^3.8.1",
     "path-to-regexp": "^3.0.0",
-    "rxjs": "^5.0.0"
+    "rxjs": "^5.0.0",
+    "set-cookie-parser": "^2.3.5"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-import": "^2.17.3",
     "mocha": "^6.1.4",
-    "nodemon": "^1.18.11",
+    "nodemon": "^1.19.1",
     "pre-commit": "1.2.2"
   },
   "jest": {

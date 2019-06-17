@@ -66,4 +66,4 @@ In this section, contains the list of services to be executed when the request i
 
 ## output
 
-In this section, contains the information of output format from the route. Once all services executed, composit JS will respond to the client based on the information from output section. For more please read [here](output.md).
+In this section, contains the information of output format from the route. After execution of all services configured, composit JS will response depends strategy information from output section. For more please read [here](output.md).
