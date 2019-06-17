@@ -34,8 +34,9 @@ const config = {
 |------------|---------|-------------------------------------------------|
 | `appRoot`      | string                        | Default value is Current working dir (process.cwd()). This identifies the Application root folder     |
 | `server`       | [Server](#serverConfig)       | This configure the application server details     |
-| `routes`       | [Directory](#directoryConfig) | Optional. Default `{root}/definitions/routes/`. Provides the route definitions directory and file  configuration. |
-| `services`     | [Directory](#directoryConfig) | Optional. Default `{root}/definitions/services/`. Provides the services definitions directory and file configuration. |
+| `routes`       | [Directory](#directoryConfig) | Optional. Default `{root}/definitions/routes/`. Define the route definition files configuration. |
+| `services`     | [Directory](#directoryConfig) | Optional. Default `{root}/definitions/services/`. Define the service definition files configuration. |
+| `middlewares`  | [Directory](#directoryConfig) | Optional. Default `{root}/middlewares/`. Define the middlware files configuration. |
 
 #### <a name="serverConfig"></a> Server configuration
 
