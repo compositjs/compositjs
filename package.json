@@ -43,8 +43,11 @@
     "eslint-plugin-import": "^2.17.3",
     "mocha": "^6.1.4",
     "nodemon": "^1.19.1",
-    "pre-commit": "1.2.2"
+    "pre-commit": "^1.2.2"
   },
+  "pre-commit":[
+    "lint"
+  ],
   "jest": {
     "clearMocks": true,
     "collectCoverage": true,
