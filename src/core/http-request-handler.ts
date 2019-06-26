@@ -1,13 +1,13 @@
 
-import { inject } from '@loopback/context';
+import { inject, Context } from '@loopback/context';
 import async from 'async';
 import cookie from 'cookie';
 import { bindHeadersToContext, getParamsFromContext, RequestContext } from '../context';
 import RoutingTable from '../routes/routing-table';
-import { ApplicationBindings } from '../utils';
+import { ApplicationBindings, IRequestContext } from '../utils';
 
 
-const buildResponse = async (route: any, context: any, response: any) => {
+const buildResponse = async (route: any, context: IRequestContext, response: any) => {
   if (!route.output) {
     throw new Error('Output not defined in route');
   }
@@ -67,7 +67,7 @@ export default class HTTPRequestHandler {
    *
    * @param rootContext
    */
-  constructor(@inject(ApplicationBindings.INSTANCE) public app: any) {
+  constructor(@inject(ApplicationBindings.INSTANCE) public app: Context) {
 
     this.routingTable = new RoutingTable();
 
@@ -77,7 +77,7 @@ export default class HTTPRequestHandler {
   async handleRequest(request: any, response: any) {
 
     // Creating RequestContext
-    const requestContext = new RequestContext(request, response);
+    const requestContext: IRequestContext = new RequestContext(request, response);
 
     // Finding route
     const route = this.routingTable.find(requestContext);
@@ -98,7 +98,7 @@ export default class HTTPRequestHandler {
     }
   }
 
-  async processRoute(route: any, context: any) {
+  async processRoute(route: any, context: IRequestContext) {
     return new Promise(async (resolve: any) => {
       try {
         async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
@@ -113,7 +113,7 @@ export default class HTTPRequestHandler {
     });
   }
 
-  async processService(serviceConfig: any, context: any) {
+  async processService(serviceConfig: any, context: IRequestContext) {
     const self = this;
 
     return new Promise(async (resolve) => {

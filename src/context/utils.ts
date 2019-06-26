@@ -3,6 +3,7 @@ import cookie from 'cookie';
 import debugFactory from 'debug';
 import setCookie from 'set-cookie-parser';
 import { CONTEXT_PREFIX } from '../utils';
+import { Context } from '@loopback/context';
 const debug = debugFactory('compositjs:context:utils');
 
 /**
@@ -13,7 +14,7 @@ const debug = debugFactory('compositjs:context:utils');
  * @param {object} ctx Context
  * @param {string} svcKeyPre Service key prefix
  */
-export function bindHeadersToContext(headers: any, ctx: any, svcKeyPre: any) {
+export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPre: any) {
   // Setting up headers to context
   Object.keys(headers).forEach((key) => {
     if (key === 'cookie') return; // Not setting cookie with his loop
@@ -49,12 +50,12 @@ export function bindHeadersToContext(headers: any, ctx: any, svcKeyPre: any) {
  * @param {object} params
  * @param {object} context
  */
-export function getParamsFromContext(params: any, context: any) {
+export function getParamsFromContext(params: any, context: Context) {
   const result: any = {};
 
   if (!params) return result;
 
-  // If params is a string which direct variable path for accessing from context
+  // If params type is a string and which is able to accessing directly from context
   if (params && typeof params === 'string' && params.substring(0, 2) === CONTEXT_PREFIX) {
     return context.getSync(params.replace(CONTEXT_PREFIX, ''));
   }

@@ -10,3 +10,4 @@ certs/
 .idea
 .npmrc
 examples
+Tempnpm-cache

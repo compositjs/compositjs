@@ -1,12 +1,12 @@
 
 
-import { inject } from '@loopback/context';
+import { inject, Context } from '@loopback/context';
 import debugFactory from 'debug';
-import { Service } from '../services';
 import { ApplicationBindings } from '../utils';
 import ConfigLoader from './loader';
+import { IApplicationConfiguration } from '../utils/types';
+import { ServiceFactory } from '../services';
 const debug = debugFactory('compositjs:boorstraper');
-
 
 /**
  * Boot application class responsible for binding configured plugins e.g
@@ -18,7 +18,7 @@ export default class BootApplication {
 
   constructor(
     @inject(ApplicationBindings.CONFIG)
-    config: any
+    config: IApplicationConfiguration
   ) {
 
     // Retriving application root folder.
@@ -56,13 +56,13 @@ export default class BootApplication {
    *
    * @param {object} app
    */
-  boot(app: any) {
+  boot(app: Context) {
 
     // Register services first to accessing while route registration
     if (this.configs.services) {
       Object.values(this.configs.services).forEach((serviceSpec: any) => {
         app.configure(`service.${serviceSpec.info.name}`).to(serviceSpec).lock();
-        app.bind(`service.${serviceSpec.info.name}`).toClass(Service).lock();
+        app.bind(`service.${serviceSpec.info.name}`).toClass(ServiceFactory).lock();
       });
     }
 

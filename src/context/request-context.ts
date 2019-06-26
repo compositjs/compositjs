@@ -3,18 +3,16 @@
 import { Context } from '@loopback/context';
 import url from 'url';
 import { bindHeadersToContext } from './utils';
+import { IRequestContext } from '../utils';
 const querystring = require('querystring');
 
-export default class RequestContext extends Context {
-
-  req: any;
-  res: any;
-
-  constructor(request: any, response: any) {
+export default class RequestContext extends Context implements IRequestContext {
+  
+  constructor(
+    public req: any, 
+    public res: any
+  ) {
     super();
-
-    this.req = request;
-    this.res = response;
 
     this._populateHeaderVariables();
     this._populateRequestVariables();

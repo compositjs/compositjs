@@ -1,10 +1,11 @@
 
-import { inject } from '@loopback/context';
+import { inject, Context } from '@loopback/context';
 import debugFactory from 'debug';
 import http from 'http';
 import https from 'https';
 import Koa from 'koa';
 import { ApplicationBindings } from '../utils';
+import { IApplicationConfiguration } from '../utils';
 const debug = debugFactory('compositjs:server');
 
 /**
@@ -37,12 +38,12 @@ export default class Server {
    * @param configuration
    */
   constructor(
-    @inject(ApplicationBindings.INSTANCE) public app: any,
-    @inject(ApplicationBindings.CONFIG) config: any,
+    @inject(ApplicationBindings.INSTANCE) public app: Context,
+    @inject(ApplicationBindings.CONFIG) config: IApplicationConfiguration,
   ) {
 
     this._port = config.server.port || 5000;
-    this._host = config.server.host || undefined;
+    this._host = config.server.host || '';
     this._protocol = config.server.protocol || 'http';
 
     this._middlewaresView = app.createView((binding: any) => binding.tagMap[ApplicationBindings.MIDDLEWARES] != null);
@@ -55,7 +56,7 @@ export default class Server {
 
     this._listener.use(await this.composeMiddlewares());
 
-    const httpRequestHandler = this.app.getSync('http.requestHandler');
+    const httpRequestHandler: any = this.app.getSync('http.requestHandler');
 
     // Start listener the request and response to client
     this._listener.use(async (ctx: any, next: any) => {

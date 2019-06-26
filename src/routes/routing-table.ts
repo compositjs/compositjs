@@ -3,6 +3,7 @@ import debugFactory from 'debug';
 import * as _ from 'lodash';
 import { openAPIParameterResolver } from './openapi';
 import { validateAndFormatPath } from './utils/path';
+import { IRequestContext } from '../utils';
 const debug = debugFactory('compositjs:routing-table');
 
 /**
@@ -30,10 +31,7 @@ export default class RoutingTable {
 
   _routes: any = [];
 
-  constructor() {
-  }
-
-  find(requestContext: any) {
+  find(requestContext: IRequestContext) {
     let matchedRoute = null;
     const reqPath = requestContext.getSync('request.path');
     const reqMethod = requestContext.getSync('request.method');

@@ -4,12 +4,13 @@ import debugFactory from 'debug';
 import BootApplication from '../boot/boot.application';
 import HTTPRequestHandler from './http-request-handler';
 import Server from './server';
+import { IApplicationConfiguration } from '../utils';
 const { ApplicationBindings } = require('../utils');
 const debug = debugFactory('compositjs:application');
 
 export default class Application extends Context {
 
-  constructor(options = {}) {
+  constructor(options: IApplicationConfiguration) {
 
     super();
 

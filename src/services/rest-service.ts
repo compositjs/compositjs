@@ -1,5 +1,3 @@
-
-
 import Confidence from 'confidence';
 import cookie from 'cookie';
 import debugFactory from 'debug';
@@ -8,6 +6,7 @@ import pathToRegExp from 'path-to-regexp';
 import { getParamsFromContext } from '../context';
 import { returnErrorResponse, serviceNotAvaliable, serviceTimedOut } from '../error-handler';
 import { getServiceBreaker } from './hystrix';
+import { IService, IRequestContext } from '../utils';
 const debug = debugFactory('compositjs:service:rest-service');
 
 /**
@@ -18,7 +17,7 @@ const debug = debugFactory('compositjs:service:rest-service');
  *
  * @returns Rest Service path
  */
-const resolveServicePath = (spec: any, context: any) => {
+const resolveServicePath = (spec: any, context: IRequestContext) => {
   let queryparams: any = {};
   let pathparams: any = {};
 
@@ -63,7 +62,7 @@ const resolveServicePath = (spec: any, context: any) => {
  * @param {object} context context
  * @returns Rest Service URL
  */
-const resolveServiceURL = (spec: any, context: any) => {
+const resolveServiceURL = (spec: any, context: IRequestContext) => {
   const { host } = spec;
   const path = resolveServicePath(spec, context);
 
@@ -72,67 +71,67 @@ const resolveServiceURL = (spec: any, context: any) => {
   return `${host}${path}`;
 };
 
-export default class RestserviceController {
+/**
+ * Building request options from JSON configuration file
+ */
+const resolveRequestConfigurations = (spec: any, context: IRequestContext) => {
+  const { service } = spec;
 
-  spec: any;
+  const headerparams = getParamsFromContext(service.headers, context);
+  const isJSON = !!(headerparams['content-type'] && headerparams['content-type'].indexOf('json') > -1);
+
+  const config: any = {
+    options: {
+      json: isJSON,
+      method: service.method,
+      headers: headerparams,
+      followRedirect: false,
+    },
+  };
+
+  config.options.timeout = service.timeout || process.env.DEFAULT_SERVICE_TIMEOUT;
+
+  // Setting cookies
+  const cookieparams = getParamsFromContext(service.cookies, context);
+
+  const cookies = Object.keys(cookieparams).map(item => cookie.serialize(item, cookieparams[item]));
+
+  if (cookies.length > 0) {
+    config.options.headers.cookie = cookies.join(';');
+  }
+
+  // If URL is not defined the then resolve from host and path
+  if (!service.url) {
+    if (!service.host || !service.path) {
+      throw new Error('Service sepecification host and path is required, if URL is not define.');
+    }
+
+    config.url = resolveServiceURL(service, context);
+  }
+
+  debug('Request config:', config);
+
+  return config;
+}
+
+export default class RestService implements IService {
+
   _service: any;
 
-  constructor(spec: any = {}) {
+  constructor(public spec: any = {}) {
     this.spec = new Confidence.Store(spec).get('/');
     this._service = getServiceBreaker(spec);
   }
 
-  /**
-   * Building request options from JSON configuration file
-   */
-  resolveRequestConfigurations(context: any) {
-    const { service } = this.spec;
-
-    const headerparams = getParamsFromContext(service.headers, context);
-    const isJSON = !!(headerparams['content-type'] && headerparams['content-type'].indexOf('json') > -1);
-
-    const config: any = {
-      options: {
-        json: isJSON,
-        method: service.method,
-        headers: headerparams,
-        followRedirect: false,
-      },
-    };
-
-    config.options.timeout = service.timeout || process.env.DEFAULT_SERVICE_TIMEOUT;
-
-    // Setting cookies
-    const cookieparams = getParamsFromContext(service.cookies, context);
-
-    const cookies = Object.keys(cookieparams).map(item => cookie.serialize(item, cookieparams[item]));
-
-    if (cookies.length > 0) {
-      config.options.headers.cookie = cookies.join(';');
-    }
-
-    // If URL is not defined the then resolve from host and path
-    if (!service.url) {
-      if (!service.host || !service.path) {
-        throw new Error('Service sepecification host and path is required, if URL is not define.');
-      }
-
-      config.url = resolveServiceURL(service, context);
-    }
-
-    debug('Request config:', config);
-
-    return config;
-  }
-
   // Execute for RestService
-  async invoke(context: any) {
-    const reqConfigs = this.resolveRequestConfigurations(context);
+  async invoke(context: IRequestContext) {
+    
+    const reqConfig = resolveRequestConfigurations(this.spec, context);
     let response: any = {};
 
     try {
       // Executing service through hystrix
-      response = await this._service.execute(reqConfigs.url, reqConfigs.options);
+      response = await this._service.execute(reqConfig.url, reqConfig.options);
     } catch (err) {
       let error = {};
 
