@@ -1,5 +1,5 @@
 
-import { inject, Context } from '@loopback/context';
+import { Context, inject } from '@loopback/context';
 import async from 'async';
 import cookie from 'cookie';
 import { bindHeadersToContext, getParamsFromContext, RequestContext } from '../context';
@@ -58,8 +58,8 @@ const buildResponse = async (route: any, context: IRequestContext, response: any
  * @param {*} server
  */
 export default class HTTPRequestHandler {
-
   routingTable: any;
+
   /**
    * Request handler
    *
@@ -68,14 +68,12 @@ export default class HTTPRequestHandler {
    * @param rootContext
    */
   constructor(@inject(ApplicationBindings.INSTANCE) public app: Context) {
-
     this.routingTable = new RoutingTable();
 
     Object.values(app.find('route.*')).forEach((specs: any) => this.routingTable.register(specs.getValue()));
   }
 
   async handleRequest(request: any, response: any) {
-
     // Creating RequestContext
     const requestContext: IRequestContext = new RequestContext(request, response);
 
@@ -84,14 +82,12 @@ export default class HTTPRequestHandler {
 
     // If route found
     if (route) {
-
       // Binding path parameters with current request context
       Object.keys(route.pathParams).forEach(key => requestContext.bind(`request.path.${key}`).to(route.pathParams[key]));
 
       await this.processRoute(route, requestContext);
 
       await buildResponse(route, requestContext, response);
-
     } else {
       response.body = '';
       response.status = 404;
@@ -102,10 +98,8 @@ export default class HTTPRequestHandler {
     return new Promise(async (resolve: any) => {
       try {
         async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
-
           const services = serviceGroup.services.map((service: any) => this.processService(service, context));
-          await Promise.all(services).catch((err) => console.log(err));
-
+          await Promise.all(services).catch(err => console.log(err));
         }, resolve);
       } catch (err) {
         console.log(err);
@@ -116,7 +110,7 @@ export default class HTTPRequestHandler {
   async processService(serviceConfig: any, context: IRequestContext) {
     const self = this;
 
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       try {
         console.log(`Processing ${serviceConfig.id} started.`);
 

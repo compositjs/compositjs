@@ -1,2 +1,2 @@
 
-export { default as ServiceFactory } from './service-factory';
+export { default as RestService } from './rest-service/rest-service';

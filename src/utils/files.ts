@@ -17,9 +17,9 @@ function fileExistsSync(filepath: string) {
   } catch (e) {
     return false;
   }
-};
+}
 
 export function ifExists(file: string) {
   const filepath = path.resolve(file);
   return fileExistsSync(filepath) ? filepath : undefined;
-};
+}

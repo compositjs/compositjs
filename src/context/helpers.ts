@@ -1,9 +1,9 @@
-
+import { Context } from '@loopback/context';
 import cookie from 'cookie';
 import debugFactory from 'debug';
 import setCookie from 'set-cookie-parser';
 import { CONTEXT_PREFIX } from '../utils';
-import { Context } from '@loopback/context';
+
 const debug = debugFactory('compositjs:context:utils');
 
 /**
@@ -16,7 +16,7 @@ const debug = debugFactory('compositjs:context:utils');
  */
 export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPre: any) {
   // Setting up headers to context
-  Object.keys(headers).forEach((key) => {
+  Object.keys(headers).forEach(key => {
     if (key === 'cookie') return; // Not setting cookie with his loop
     ctx.bind(`${svcKeyPre}.headers.${key}`).to(headers[key]).tag(svcKeyPre);
   });
@@ -24,7 +24,7 @@ export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPre: any)
   // Setting up cookies to context
   const cookies = headers && headers.cookie ? cookie.parse(headers.cookie) : (headers['set-cookie'] ? setCookie(headers['set-cookie'], { map: true }) : {});
   Object.keys(cookies).forEach(key => ctx.bind(`${svcKeyPre}.cookie.${key}`).to(cookies[key]));
-};
+}
 
 /**
  * This function returns resolved paramters which defined in service configuration.
@@ -85,4 +85,4 @@ export function getParamsFromContext(params: any, context: Context) {
   });
 
   return result;
-};
+}

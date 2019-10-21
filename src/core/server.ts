@@ -4,8 +4,8 @@ import debugFactory from 'debug';
 import http from 'http';
 import https from 'https';
 import Koa from 'koa';
-import { ApplicationBindings } from '../utils';
-import { IApplicationConfiguration } from '../utils';
+import { ApplicationBindings, IApplicationConfiguration } from '../utils';
+
 const debug = debugFactory('compositjs:server');
 
 /**
@@ -16,16 +16,22 @@ const debug = debugFactory('compositjs:server');
  */
 
 export default class Server {
-
   _port: number;
+
   _host: string;
+
   _protocol: string;
+
   _listening: any;
+
   _address: any;
 
   _middlewaresView: any;
+
   _listener: any;
+
   _requestHandler: any;
+
   _server: any;
 
   _serverOptions: any;
@@ -41,7 +47,6 @@ export default class Server {
     @inject(ApplicationBindings.INSTANCE) public app: Context,
     @inject(ApplicationBindings.CONFIG) config: IApplicationConfiguration,
   ) {
-
     this._port = config.server.port || 5000;
     this._host = config.server.host || '';
     this._protocol = config.server.protocol || 'http';
@@ -50,7 +55,6 @@ export default class Server {
   }
 
   async setupRequestHandler() {
-
     // Initializing default request listener
     this._listener = new Koa();
 

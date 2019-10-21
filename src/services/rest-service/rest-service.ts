@@ -1,12 +1,13 @@
+import { config } from '@loopback/context';
 import Confidence from 'confidence';
 import cookie from 'cookie';
 import debugFactory from 'debug';
 import { get } from 'lodash';
 import pathToRegExp from 'path-to-regexp';
-import { getParamsFromContext } from '../context';
-import { returnErrorResponse, serviceNotAvaliable, serviceTimedOut } from '../error-handler';
+import { getParamsFromContext } from '../../context';
+import { returnErrorResponse, serviceNotAvaliable, serviceTimedOut } from '../../error-handler';
+import { IRequestContext, IService } from '../../utils';
 import { getServiceBreaker } from './hystrix';
-import { IService, IRequestContext } from '../utils';
 const debug = debugFactory('compositjs:service:rest-service');
 
 /**
@@ -118,14 +119,17 @@ export default class RestService implements IService {
 
   _service: any;
 
-  constructor(public spec: any = {}) {
+  constructor(
+    @config()
+    public spec: any = {}
+  ) {
     this.spec = new Confidence.Store(spec).get('/');
     this._service = getServiceBreaker(spec);
   }
 
   // Execute for RestService
-  async invoke(context: IRequestContext) {
-    
+  async execute(context: IRequestContext) {
+
     const reqConfig = resolveRequestConfigurations(this.spec, context);
     let response: any = {};
 

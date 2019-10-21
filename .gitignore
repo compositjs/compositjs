@@ -11,3 +11,4 @@ certs/
 .npmrc
 examples
 Tempnpm-cache
+lib

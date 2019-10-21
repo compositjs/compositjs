@@ -14,8 +14,8 @@
   },
   "scripts": {
     "test": "jest",
-    "lint": "eslint lib/**/*.js",
-    "lint:fix": "eslint lib/**/*.js --fix",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
     "tsc": "tsc"
   },
   "dependencies": {
@@ -39,19 +39,24 @@
   },
   "devDependencies": {
     "@types/async": "^3.0.0",
-    "@types/cookie": "^0.3.3",
     "@types/confidence": "^1.4.30",
+    "@types/cookie": "^0.3.3",
     "@types/debug": "^4.1.4",
     "@types/got": "^9.6.0",
     "@types/http-errors": "^1.6.1",
     "@types/koa": "^2.0.48",
     "@types/lodash": "^4.14.134",
     "@types/set-cookie-parser": "0.0.5",
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.17.3",
+    "eslint-config-airbnb-typescript": "^5.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-react": "^7.16.0",
+    "eslint-plugin-react-hooks": "^1.7.0",
     "mocha": "^6.1.4",
     "nodemon": "^1.19.1",
     "pre-commit": "^1.2.2"

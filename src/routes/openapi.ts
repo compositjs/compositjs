@@ -3,6 +3,7 @@ import debugFactory from 'debug';
 import OpenAPIDefaultSetter from 'openapi-default-setter';
 import OpenAPIRequestValidator from 'openapi-request-validator';
 import OpenapiRequestCoercer from 'openapi-request-coercer';
+
 const debug = debugFactory('compositjs:routing-table:open-api');
 
 /**
@@ -43,4 +44,4 @@ export function openAPIParameterResolver(parameters: any, request: any) {
   }
 
   return true;
-};
+}

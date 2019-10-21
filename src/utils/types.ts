@@ -1,4 +1,4 @@
-import { Context } from "@loopback/context";
+import { Context } from '@loopback/context';
 
 /**
  * Configuration for plugin definitions
@@ -31,7 +31,7 @@ export interface IApplicationConfiguration {
  */
 export interface IService {
 
-  invoke(context: Context): Promise<void>
+  execute(context: Context): Promise<void>
 }
 
 /**

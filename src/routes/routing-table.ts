@@ -4,6 +4,7 @@ import * as _ from 'lodash';
 import { openAPIParameterResolver } from './openapi';
 import { validateAndFormatPath } from './utils/path';
 import { IRequestContext } from '../utils';
+
 const debug = debugFactory('compositjs:routing-table');
 
 /**
@@ -28,7 +29,6 @@ const getPathParams = (routeKeys: any, routeMatch: any) => {
  * and its responsible for identifying(find) routes when request comes.
  */
 export default class RoutingTable {
-
   _routes: any = [];
 
   find(requestContext: IRequestContext) {
@@ -115,7 +115,7 @@ export default class RoutingTable {
       }
 
       route.services.map((service: any) => {
-        serviceGroups[index].services.push(Object.assign({}, _.omit(service, ['services'])));
+        serviceGroups[index].services.push({ ..._.omit(service, ['services']) });
         return this.createServicesToGroups(service, serviceGroups, index + 1);
       });
     }

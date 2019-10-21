@@ -2,14 +2,14 @@
 export function fillStatusCode(err: any, data: any) {
   data.statusCode = err.statusCode || err.status;
   if (!data.statusCode || data.statusCode < 400) { data.statusCode = 500; }
-};
+}
 
 export function fillRequestErrorData(err: any, data: any) {
   data.name = err.name;
   data.message = err.message;
   data.code = err.code;
   data.details = err.details;
-};
+}
 
 export function buildErrorResponseData(err: any, opts: any = {}) {
   if (Array.isArray(err)) {
@@ -22,7 +22,7 @@ export function buildErrorResponseData(err: any, opts: any = {}) {
   fillRequestErrorData(err, data);
 
   return data;
-};
+}
 
 export function serializeArrayOfErrors(errors: any, options: any) {
   const details = errors.map((e: any) => buildErrorResponseData(e, options));
@@ -30,7 +30,7 @@ export function serializeArrayOfErrors(errors: any, options: any) {
     statusCode: 500,
     details,
   };
-};
+}
 
 export function returnErrorResponse(error: any, opts: any = {}) {
   const options: any = opts || {};
@@ -41,4 +41,4 @@ export function returnErrorResponse(error: any, opts: any = {}) {
     body: data,
     status: data.statusCode,
   };
-};
+}

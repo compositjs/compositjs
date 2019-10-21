@@ -1,5 +1,7 @@
-{ 
-    "extends": "airbnb-base",
+{
+    "extends": [
+        "airbnb-typescript"
+    ],
     "env": {
         "browser": false,
         "es6": true,
@@ -8,6 +10,9 @@
     "rules": {
         "strict": 2,
         "no-underscore-dangle": 0,
-        "max-len": [2, 180]
+        "max-len": [
+            2,
+            180
+        ]
     }
 }
