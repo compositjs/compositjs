@@ -150,7 +150,7 @@ export default class RestService implements IService {
       }
 
       // Assigning refactored error to response
-      response = returnErrorResponse(error, {});
+      response = returnErrorResponse(error);
 
       if (this.spec.service.fallback) {
         debug(`fallback for service(${this.spec.info.name})`, response);

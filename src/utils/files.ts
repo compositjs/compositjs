@@ -10,7 +10,7 @@ import * as path from 'path';
  * @param   {String} filepath The absolute path to check
  * @returns {Boolean}  True if the file exists
  */
-function fileExistsSync(filepath: string) {
+export function fileExistsSync(filepath: string) {
   try {
     fs.statSync(filepath);
     return true;

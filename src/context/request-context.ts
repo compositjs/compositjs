@@ -42,7 +42,7 @@ export default class RequestContext extends Context implements IRequestContext {
     this.bind('request.query').to(querystring.decode(urlParsed.query) || {});
 
     const query = (querystring.decode(urlParsed.query) || {});
-    Object.keys(query).forEach(key => this.bind(`request.query.${key}`).to(query[key]));
+    Object.keys(query).forEach((key) => this.bind(`request.query.${key}`).to(query[key]));
 
     this.bind('request.content-type').to(this.req.get('content-type') || '');
     this.bind('request.date').to(new Date());

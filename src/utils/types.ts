@@ -4,26 +4,26 @@ import { Context } from '@loopback/context';
  * Configuration for plugin definitions
  */
 interface IPluginConfiguration {
-  dir: string;
-  extension: string;
+  dir?: string;
+  extension?: string;
 }
 
-interface IServerConfiguration {
-  host: string;
-  port: number;
-  protocol: string;
+export interface IServerConfiguration {
+  host?: string;
+  port?: number;
+  protocol?: string;
 }
 
 /**
  * Configuration for application
  */
 export interface IApplicationConfiguration {
-  env: string;
-  routes: IPluginConfiguration;
-  services: IPluginConfiguration;
-  middlewares: IPluginConfiguration;
-  appRoot: string;
-  server: IServerConfiguration;
+  enviornment?: string;
+  routes?: IPluginConfiguration;
+  services?: IPluginConfiguration;
+  middlewares?: IPluginConfiguration;
+  appRoot?: string;
+  server?: IServerConfiguration;
 }
 
 /**

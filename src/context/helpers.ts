@@ -6,6 +6,15 @@ import { CONTEXT_PREFIX } from '../utils';
 
 const debug = debugFactory('compositjs:context:utils');
 
+const parseCookie = (headers: any) => {
+  if (headers && headers.cookie) {
+    return cookie.parse(headers.cookie);
+  } if (headers['set-cookie']) {
+    return setCookie(headers['set-cookie'], { map: true });
+  }
+  return {};
+};
+
 /**
  * `setHeadersToContext` is utility function to set header information
  * to given context binding with given prefix.
@@ -14,16 +23,19 @@ const debug = debugFactory('compositjs:context:utils');
  * @param {object} ctx Context
  * @param {string} svcKeyPre Service key prefix
  */
-export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPre: any) {
+export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPrefix: any) {
   // Setting up headers to context
-  Object.keys(headers).forEach(key => {
+  Object.keys(headers).forEach((key) => {
     if (key === 'cookie') return; // Not setting cookie with his loop
-    ctx.bind(`${svcKeyPre}.headers.${key}`).to(headers[key]).tag(svcKeyPre);
+    ctx.bind(`${svcKeyPrefix}.headers.${key}`).to(headers[key]).tag(svcKeyPrefix);
   });
 
   // Setting up cookies to context
-  const cookies = headers && headers.cookie ? cookie.parse(headers.cookie) : (headers['set-cookie'] ? setCookie(headers['set-cookie'], { map: true }) : {});
-  Object.keys(cookies).forEach(key => ctx.bind(`${svcKeyPre}.cookie.${key}`).to(cookies[key]));
+  if (headers && headers.cookie) {
+    cookie.parse(headers.cookie);
+  }
+  const cookies = parseCookie(headers);
+  Object.keys(cookies).forEach((key) => ctx.bind(`${svcKeyPrefix}.cookie.${key}`).to(cookies[key]));
 }
 
 /**

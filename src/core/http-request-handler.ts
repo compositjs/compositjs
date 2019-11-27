@@ -2,10 +2,12 @@
 import { Context, inject } from '@loopback/context';
 import async from 'async';
 import cookie from 'cookie';
+import debugFactory from 'debug';
 import { bindHeadersToContext, getParamsFromContext, RequestContext } from '../context';
 import RoutingTable from '../routes/routing-table';
 import { ApplicationBindings, IRequestContext } from '../utils';
 
+const debug = debugFactory('compositjs:core:http-request-handler');
 
 const buildResponse = async (route: any, context: IRequestContext, response: any) => {
   if (!route.output) {
@@ -13,11 +15,11 @@ const buildResponse = async (route: any, context: IRequestContext, response: any
   }
 
   const headerparams = getParamsFromContext(route.output.headers, context);
-  Object.keys(headerparams).map(headerparam => response.set(headerparam, headerparams[headerparam]));
+  Object.keys(headerparams).map((headerparam) => response.set(headerparam, headerparams[headerparam]));
 
   const newCookies: any = [];
   const cookieparams = getParamsFromContext(route.output.cookies, context);
-  Object.keys(cookieparams).map(cookiename => newCookies.push(cookie.serialize(cookiename, cookieparams[cookiename].value, cookieparams[cookiename])));
+  Object.keys(cookieparams).map((cookiename) => newCookies.push(cookie.serialize(cookiename, cookieparams[cookiename].value, cookieparams[cookiename])));
 
   if (newCookies.length > 0) {
     response.set('set-cookie', [...newCookies]);
@@ -83,7 +85,7 @@ export default class HTTPRequestHandler {
     // If route found
     if (route) {
       // Binding path parameters with current request context
-      Object.keys(route.pathParams).forEach(key => requestContext.bind(`request.path.${key}`).to(route.pathParams[key]));
+      Object.keys(route.pathParams).forEach((key) => requestContext.bind(`request.path.${key}`).to(route.pathParams[key]));
 
       await this.processRoute(route, requestContext);
 
@@ -95,43 +97,39 @@ export default class HTTPRequestHandler {
   }
 
   async processRoute(route: any, context: IRequestContext) {
-    return new Promise(async (resolve: any) => {
-      try {
-        async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
-          const services = serviceGroup.services.map((service: any) => this.processService(service, context));
-          await Promise.all(services).catch(err => console.log(err));
-        }, resolve);
-      } catch (err) {
-        console.log(err);
-      }
-    });
+    try {
+      await async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
+        const services = serviceGroup.services.map((service: any) => this.processService(service, context));
+        await Promise.all(services).catch((err) => debug(err));
+      });
+    } catch (err) {
+      debug(err);
+    }
+
+    return true;
   }
 
   async processService(serviceConfig: any, context: IRequestContext) {
     const self = this;
 
-    return new Promise(async resolve => {
-      try {
-        console.log(`Processing ${serviceConfig.id} started.`);
+    try {
+      debug(`Processing ${serviceConfig.id} started.`);
 
-        // Retriving service by id or serviceName
-        const service: any = self.app.getSync(`service.${serviceConfig.serviceName || serviceConfig.id}`);
+      // Retriving service by id or serviceName
+      const service: any = self.app.getSync(`service.${serviceConfig.serviceName || serviceConfig.id}`);
 
-        // Executing service
-        const serviceResponse = await service.execute(context);
+      // Executing service
+      const serviceResponse = await service.execute(context);
 
-        console.log(`Processing ${serviceConfig.id} finised.`);
+      debug(`Processing ${serviceConfig.id} finised.`);
 
-        const serviceKeyPrefix = `service.${serviceConfig.id}`;
-        context.bind(`${serviceKeyPrefix}.body`).to(serviceResponse.body || '');
-        context.bind(`${serviceKeyPrefix}.status`).to(serviceResponse.statusCode || serviceResponse.status || serviceResponse.body.statusCode);
+      const serviceKeyPrefix = `service.${serviceConfig.id}`;
+      context.bind(`${serviceKeyPrefix}.body`).to(serviceResponse.body || '');
+      context.bind(`${serviceKeyPrefix}.status`).to(serviceResponse.statusCode || serviceResponse.status || serviceResponse.body.statusCode);
 
-        bindHeadersToContext(serviceResponse.headers || {}, context, serviceKeyPrefix);
-
-        resolve();
-      } catch (err) {
-        console.log(err);
-      }
-    });
+      bindHeadersToContext(serviceResponse.headers || {}, context, serviceKeyPrefix);
+    } catch (err) {
+      debug(err);
+    }
   }
 }

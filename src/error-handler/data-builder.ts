@@ -1,41 +1,49 @@
 
 export function fillStatusCode(err: any, data: any) {
-  data.statusCode = err.statusCode || err.status;
-  if (!data.statusCode || data.statusCode < 400) { data.statusCode = 500; }
+  let statusCode = err.statusCode || err.status;
+  if (!statusCode || statusCode < 400) {
+    statusCode = 500;
+  }
+  return {
+    ...data,
+    statusCode,
+  };
 }
 
 export function fillRequestErrorData(err: any, data: any) {
-  data.name = err.name;
-  data.message = err.message;
-  data.code = err.code;
-  data.details = err.details;
+  return {
+    ...data,
+    name: err.name,
+    message: err.message,
+    code: err.code,
+    details: err.details,
+  };
 }
 
-export function buildErrorResponseData(err: any, opts: any = {}) {
-  if (Array.isArray(err)) {
-    return serializeArrayOfErrors(err, opts);
-  }
-
-  const data = Object.create(null);
-  fillStatusCode(err, data);
-
-  fillRequestErrorData(err, data);
+export function buildErrorResponseData(err: any) {
+  let data = Object.create(null);
+  data = fillStatusCode(err, data);
+  data = fillRequestErrorData(err, data);
 
   return data;
 }
 
-export function serializeArrayOfErrors(errors: any, options: any) {
-  const details = errors.map((e: any) => buildErrorResponseData(e, options));
+export function serializeArrayOfErrors(errors: any) {
+  const details = errors.map((e: any) => buildErrorResponseData(e));
   return {
     statusCode: 500,
     details,
   };
 }
 
-export function returnErrorResponse(error: any, opts: any = {}) {
-  const options: any = opts || {};
 
-  const data = buildErrorResponseData(error, options);
+export function returnErrorResponse(error: any) {
+  let data = null;
+  if (Array.isArray(error)) {
+    data = serializeArrayOfErrors(error);
+  } else {
+    data = buildErrorResponseData(error);
+  }
 
   return {
     body: data,

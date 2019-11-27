@@ -8,7 +8,7 @@ import pathToRegExp from 'path-to-regexp';
  * @param {String} path
  * @returns {Object} route
  */
-export function validateAndFormatPath(path = '/') {
+export function convertPathToRegexp(path = '/') {
 
   if(path == '/') {
     return { keys: [], regexp: new RegExp('^\/+$') };

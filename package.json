@@ -13,80 +13,68 @@
     "npm": "3.10.10"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "tsc": "tsc"
   },
   "dependencies": {
-    "@loopback/context": "^1.20.0",
-    "async": "^2.6.2",
+    "@loopback/context": "^1.23.4",
+    "async": "^2.6.3",
     "confidence": "^4.0.2",
     "cookie": "^0.3.1",
     "debug": "^4.1.1",
     "got": "^9.6.0",
-    "http-errors": "^1.7.2",
+    "http-errors": "^1.7.3",
     "hystrixjs": "^0.2.0",
-    "koa": "^2.7.0",
-    "lodash": "^4.17.11",
-    "openapi-default-setter": "^2.0.4",
+    "koa": "^2.11.0",
+    "lodash": "^4.17.15",
+    "openapi-default-setter": "^2.1.0",
     "openapi-request-coercer": "^2.3.0",
-    "openapi-request-validator": "^3.8.1",
-    "path-to-regexp": "^3.0.0",
+    "openapi-request-validator": "^3.8.3",
+    "path-to-regexp": "^3.1.0",
     "rxjs": "^5.0.0",
-    "set-cookie-parser": "^2.3.5",
-    "typescript": "^3.5.2"
+    "set-cookie-parser": "^2.4.0",
+    "typescript": "^3.6.4"
   },
   "devDependencies": {
-    "@types/async": "^3.0.0",
+    "@types/async": "^3.0.3",
     "@types/confidence": "^1.4.30",
     "@types/cookie": "^0.3.3",
-    "@types/debug": "^4.1.4",
-    "@types/got": "^9.6.0",
-    "@types/http-errors": "^1.6.1",
-    "@types/koa": "^2.0.48",
-    "@types/lodash": "^4.14.134",
+    "@types/debug": "^4.1.5",
+    "@types/got": "^9.6.8",
+    "@types/http-errors": "^1.6.2",
+    "@types/jest": "^24.0.23",
+    "@types/koa": "^2.0.51",
+    "@types/lodash": "^4.14.144",
     "@types/set-cookie-parser": "0.0.5",
-    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/eslint-plugin": "^2.6.0",
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "eslint": "^5.16.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-config-airbnb-typescript": "^5.0.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-config-airbnb-typescript": "^5.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.16.0",
     "eslint-plugin-react-hooks": "^1.7.0",
-    "mocha": "^6.1.4",
-    "nodemon": "^1.19.1",
-    "pre-commit": "^1.2.2"
+    "jest": "^24.9.0",
+    "mocha": "^6.2.2",
+    "nodemon": "^1.19.4",
+    "pre-commit": "^1.2.2",
+    "ts-jest": "^24.1.0"
   },
-  "pre-commit": [
-    "lint"
-  ],
+  "pre-commit": [],
   "jest": {
-    "clearMocks": true,
     "collectCoverage": true,
-    "coverageDirectory": "build/coverage",
-    "coveragePathIgnorePatterns": [
-      "/build/",
-      "/docs/",
-      "/jest/",
-      "/mock-data/",
-      "/node_modules/"
-    ],
     "coverageThreshold": {
       "global": {
-        "branches": 75,
-        "functions": 90,
-        "lines": 90,
-        "statements": 90
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": -10
       }
-    },
-    "moduleDirectories": [
-      "node_modules",
-      "."
-    ],
-    "setupTestFrameworkScriptFile": "./jest/reporterConfig.js"
+    }
   }
 }

@@ -11,31 +11,42 @@ const { ApplicationBindings } = require('../utils');
 
 const debug = debugFactory('compositjs:application');
 
+const getDefaultConfigs = (appRootDir: string): IApplicationConfiguration => ({
+  enviornment: 'dev',
+  routes: {
+    dir: `${appRootDir}/definitions/routes/`,
+    extension: '.route.json',
+  },
+  services: {
+    dir: `${appRootDir}/definitions/services/`,
+    extension: '.service.json',
+  },
+  middlewares: {
+    dir: `${appRootDir}/middlewares/`,
+    extension: '.js',
+  },
+  appRoot: '',
+  server: {
+    host: '',
+    port: 5000,
+    protocol: 'https'
+  }
+})
+
 export default class Application extends Context {
   plugins: any;
 
   appConfig: IApplicationConfiguration;
 
-  constructor(config: IApplicationConfiguration) {
+  constructor(config: IApplicationConfiguration = {}) {
     super();
 
     // Retriving application root folder.
     const appRootDir: string = config.appRoot || process.cwd();
 
-    // default values
+    // default configuration values
     this.appConfig = {
-      routes: {
-        dir: `${appRootDir}/definitions/routes/`,
-        extension: '.route.json',
-      },
-      services: {
-        dir: `${appRootDir}/definitions/services/`,
-        extension: '.service.json',
-      },
-      middlewares: {
-        dir: `${appRootDir}/middlewares/`,
-        extension: '.js',
-      },
+      ...getDefaultConfigs(appRootDir),
       ...config,
     };
 
@@ -53,7 +64,7 @@ export default class Application extends Context {
 
     // Loading all plugins
     this.plugins = {
-      env: this.appConfig.env || process.env.NODE_ENV || 'development',
+      env: this.appConfig.enviornment || process.env.NODE_ENV || 'development',
       services: ConfigLoader.loadPlugins(this.appConfig.services) || [],
       routes: ConfigLoader.loadPlugins(this.appConfig.routes) || [],
       middlewares: ConfigLoader.loadPlugins(this.appConfig.middlewares) || [],

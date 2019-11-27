@@ -1,8 +1,8 @@
 
 import debugFactory from 'debug';
 import * as _ from 'lodash';
-import { openAPIParameterResolver } from './openapi';
-import { validateAndFormatPath } from './utils/path';
+import openAPIParameterResolver from './openapi';
+import { convertPathToRegexp } from './utils/path';
 import { IRequestContext } from '../utils';
 
 const debug = debugFactory('compositjs:routing-table');
@@ -81,7 +81,7 @@ export default class RoutingTable {
   }
 
   register(route: any) {
-    const routeFormat = validateAndFormatPath(route.definition.path);
+    const routeFormat = convertPathToRegexp(route.definition.path);
 
     // Generate service groups
     const serviceGroups = this.createServicesToGroups(route);

@@ -4,9 +4,15 @@ import debugFactory from 'debug';
 import http from 'http';
 import https from 'https';
 import Koa from 'koa';
-import { ApplicationBindings, IApplicationConfiguration } from '../utils';
+import { ApplicationBindings, IApplicationConfiguration, IServerConfiguration } from '../utils';
 
 const debug = debugFactory('compositjs:server');
+
+const defaultServerConfig: IServerConfiguration = {
+  host: '',
+  port: 5000,
+  protocol: 'http'
+}
 
 /**
  * HTTP / HTTPS server used
@@ -47,9 +53,10 @@ export default class Server {
     @inject(ApplicationBindings.INSTANCE) public app: Context,
     @inject(ApplicationBindings.CONFIG) config: IApplicationConfiguration,
   ) {
-    this._port = config.server.port || 5000;
-    this._host = config.server.host || '';
-    this._protocol = config.server.protocol || 'http';
+    const serverConfigs: IServerConfiguration = config.server || defaultServerConfig
+    this._port = serverConfigs.port || 5000;
+    this._host = serverConfigs.host || '';
+    this._protocol = serverConfigs.protocol || 'http';
 
     this._middlewaresView = app.createView((binding: any) => binding.tagMap[ApplicationBindings.MIDDLEWARES] != null);
   }

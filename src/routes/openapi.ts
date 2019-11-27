@@ -23,7 +23,7 @@ const debug = debugFactory('compositjs:routing-table:open-api');
  * @returns {boolean}
  *
  */
-export function openAPIParameterResolver(parameters: any, request: any) {
+export default function openAPIParameterResolver(parameters: any, request: any) {
   // Find any default value given on parameter array
   const defaultValue = parameters.some((parameter: any) => parameter.default);
 

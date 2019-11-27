@@ -1,4 +1,4 @@
-
+/* eslint global-require: "error" */
 import debugFactory from 'debug';
 import fs from 'fs';
 import * as files from './files';
@@ -44,7 +44,7 @@ function mergeSingleItemOrProperty(target: any, config: any, key: any, fullKey: 
 
 
 function mergeObjects(target: any, config: any, keyPrefix: any = '') {
-  Object.keys(config).forEach(key => {
+  Object.keys(config).forEach((key) => {
     const fullKey = keyPrefix ? `${keyPrefix}.${key}` : key;
     const err = mergeSingleItemOrProperty(target, config, key, fullKey);
     if (err) return err; return null;
@@ -141,7 +141,7 @@ function load(rootDir: string, name: string, mergeFn: any) {
   const files = findFiles(rootDir, name);
   if (files.length) {
     debug('found %s %s files', name);
-    files.forEach(f => { debug('  %s', f); });
+    files.forEach((f) => { debug('  %s', f); });
   }
   const configs = loadFiles(files);
   const merged = mergeConfigurations(configs, mergeFn);
