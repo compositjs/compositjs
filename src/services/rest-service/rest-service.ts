@@ -134,6 +134,7 @@ export default class RestService implements IService {
     let response: any = {};
 
     try {
+      console.log("Service request option:", reqConfig);
       // Executing service through hystrix
       response = await this._service.execute(reqConfig.url, reqConfig.options);
     } catch (err) {

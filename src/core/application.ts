@@ -59,7 +59,7 @@ export default class Application extends Context {
       middlewares: ConfigLoader.loadPlugins(this.appConfig.middlewares) || [],
     };
 
-    debug('configurations:', this.plugins);
+    debug('plugins:', this.plugins);
   }
 
   /**

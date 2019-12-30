@@ -1,5 +1,5 @@
 
-import { inject, Context } from '@loopback/context';
+import { Context, inject } from '@loopback/context';
 import debugFactory from 'debug';
 import http from 'http';
 import https from 'https';
@@ -29,8 +29,6 @@ export default class Server {
   _middlewaresView: any;
 
   _listener: any;
-
-  _requestHandler: any;
 
   _server: any;
 
@@ -64,15 +62,14 @@ export default class Server {
 
     // Start listener the request and response to client
     this._listener.use(async (ctx: any, next: any) => {
+
+      console.log("Request:", ctx.request)
+
       await httpRequestHandler.handleRequest(ctx.request, ctx.response);
       await next();
     });
 
     return this._listener;
-  }
-
-  get requestHandler() {
-    return this._requestHandler;
   }
 
   /**

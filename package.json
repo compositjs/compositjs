@@ -16,7 +16,7 @@
     "test": "jest",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "tsc": "tsc"
+    "tsc": "tsc --watch"
   },
   "dependencies": {
     "@loopback/context": "^1.20.0",
