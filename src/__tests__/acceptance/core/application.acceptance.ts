@@ -1,5 +1,4 @@
-import Application from "../../../src/core/application";
-import { IApplicationConfiguration } from "../../../src/utils";
+import Application from "../../../core/application";
 
 describe('Starting the application', () => {
   it('Should start application', () => {

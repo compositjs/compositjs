@@ -2,8 +2,8 @@ module.exports = {
   verbose: true,
   "rootDir": "./",
   testMatch: [
-    "**/__tests__/**/*.+(ts|tsx|js)",
-    "**/?(*.)+(spec|test|acceptance).+(ts|tsx|js)"
+    "**/src/__tests__/unit/**/*.+(ts|tsx|js)",
+    // "**/src/__tests__/acceptance/**/*.+(ts|tsx|js)"
   ],
   "transform": {
     "^.+\\.(ts|tsx)?$": "ts-jest"

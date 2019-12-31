@@ -14,10 +14,11 @@
   },
   "scripts": {
     "test": "jest --coverage",
-    "test:watch": "jest --watch",
+    "test:watch": "jest --watch --coverage",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "tsc": "tsc --watch"
+    "build": "tsc",
+    "build:watch": "tsc --watch"
   },
   "dependencies": {
     "@loopback/context": "^1.25.0",
@@ -59,9 +60,11 @@
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.17.0",
     "eslint-plugin-react-hooks": "^2.3.0",
+    "jest": "^24.9.0",
     "mocha": "^6.2.2",
     "nodemon": "^2.0.2",
-    "pre-commit": "^1.2.2"
+    "pre-commit": "^1.2.2",
+    "ts-jest": "^24.2.0"
   },
   "pre-commit": [],
   "jest": {

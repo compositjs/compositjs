@@ -1,4 +1,4 @@
-import pathToRegExp from 'path-to-regexp';
+import { pathToRegexp, parse } from 'path-to-regexp';
 
 /**
  * Validating and formatting with path-to-regexp
@@ -12,7 +12,7 @@ export function convertPathToRegexp(path = '/') {
     return { keys: [], regexp: new RegExp('^\/+$') };
   }
 
-  const tokens = pathToRegExp.parse(path);
+  const tokens = parse(path);
   Object.values(tokens).forEach((token) => {
     if (typeof token !== 'string' && typeof token.name === 'number') {
       throw new Error(`Unnamed parameter is not allowed in path '${path}'`);
@@ -20,7 +20,7 @@ export function convertPathToRegexp(path = '/') {
   });
 
   const keys: any = [];
-  const regexp = pathToRegExp(path, keys, { strict: true, end: true });
+  const regexp = pathToRegexp(path, keys, { strict: true, end: true });
 
   return { keys, regexp };
 };

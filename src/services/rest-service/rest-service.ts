@@ -119,10 +119,7 @@ export default class RestService implements IService {
 
   _service: any;
 
-  constructor(
-    @config()
-    public spec: any = {}
-  ) {
+  constructor(@config() public spec: any = {}) {
     this.spec = new Confidence.Store(spec).get('/');
     this._service = getServiceBreaker(spec);
   }

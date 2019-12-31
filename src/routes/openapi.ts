@@ -33,10 +33,10 @@ export default function openAPIParameterResolver(parameters: any, requestParamet
   // Effortlessly coerce header, path, query and formData request properties
   // to defined types in an openapi parameters list.
   new OpenAPIRequestCoercer({ parameters }).coerce(requestParameters);
-
+  
   // Validate parameters
-  const errors = new OpenAPIRequestValidator({ parameters }).validate(requestParameters);
-
+  const errors: any = new OpenAPIRequestValidator({ parameters }).validateRequest(requestParameters);
+ 
   if (errors) {
     debug('errors:', errors.errors.map((error: any) => `${error.message}; missing from ${error.location}`));
     return false;
