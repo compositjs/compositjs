@@ -1,8 +1,8 @@
 import { Context } from '@loopback/context';
 import cookie from 'cookie';
 import debugFactory from 'debug';
-import setCookie from 'set-cookie-parser';
-import { CONTEXT_PREFIX } from '../utils';
+import setCookie, { CookieMap } from 'set-cookie-parser';
+import { CONTEXT_PREFIX, ObjectString } from '../utils';
 
 const debug = debugFactory('compositjs:context:utils');
 
@@ -16,14 +16,22 @@ const debug = debugFactory('compositjs:context:utils');
  */
 export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPre: any) {
   // Setting up headers to context
-  Object.keys(headers).forEach(key => {
+  Object.keys(headers).forEach((key) => {
     if (key === 'cookie') return; // Not setting cookie with his loop
     ctx.bind(`${svcKeyPre}.headers.${key}`).to(headers[key]).tag(svcKeyPre);
   });
 
   // Setting up cookies to context
-  const cookies = headers && headers.cookie ? cookie.parse(headers.cookie) : (headers['set-cookie'] ? setCookie(headers['set-cookie'], { map: true }) : {});
-  Object.keys(cookies).forEach(key => ctx.bind(`${svcKeyPre}.cookie.${key}`).to(cookies[key]));
+  let cookies: CookieMap | ObjectString;
+  if (headers && headers.cookie) {
+    cookies = cookie.parse(headers.cookie);
+  } else if (headers['set-cookie']) {
+    cookies = setCookie(headers['set-cookie'], { map: true });
+  } else {
+    cookies = {};
+  }
+
+  Object.keys(cookies).map((key) => ctx.bind(`${svcKeyPre}.cookie.${key}`).to(cookies[key]));
 }
 
 /**

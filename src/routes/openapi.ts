@@ -1,8 +1,8 @@
 
 import debugFactory from 'debug';
 import OpenAPIDefaultSetter from 'openapi-default-setter';
-import OpenAPIRequestValidator from 'openapi-request-validator';
 import OpenapiRequestCoercer from 'openapi-request-coercer';
+import OpenAPIRequestValidator from 'openapi-request-validator';
 
 const debug = debugFactory('compositjs:routing-table:open-api');
 
@@ -23,7 +23,7 @@ const debug = debugFactory('compositjs:routing-table:open-api');
  * @returns {boolean}
  *
  */
-export function openAPIParameterResolver(parameters: any, request: any) {
+export default function openAPIParameterResolver(parameters: any, request: any) {
   // Find any default value given on parameter array
   const defaultValue = parameters.some((parameter: any) => parameter.default);
 

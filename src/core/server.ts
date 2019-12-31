@@ -62,7 +62,7 @@ export default class Server {
 
     // Start listener the request and response to client
     this._listener.use(async (ctx: any, next: any) => {
-      console.log('Request:', ctx.request);
+      debug('Request:', ctx.request);
 
       await httpRequestHandler.handleRequest(ctx.request, ctx.response);
       await next();

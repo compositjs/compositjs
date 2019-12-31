@@ -1,9 +1,9 @@
 
 import debugFactory from 'debug';
 import * as _ from 'lodash';
-import { openAPIParameterResolver } from './openapi';
-import { validateAndFormatPath } from './utils/path';
 import { IRequestContext } from '../utils';
+import openAPIParameterResolver from './openapi';
+import { validateAndFormatPath } from './utils/path';
 
 const debug = debugFactory('compositjs:routing-table');
 

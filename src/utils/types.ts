@@ -41,3 +41,7 @@ export interface IRequestContext extends Context {
   req: any;
   res: any;
 }
+
+export interface ObjectString {
+  [key: string]: string
+}
