@@ -54,11 +54,12 @@ export default class RoutingTable {
       }
 
       // Retrive path parameters for the selected route.
-      const parameters = {};
       const params = getPathParams(route.keys, match);
-      Object.assign(parameters, { query, params });
 
-      const error = openAPIParameterResolver(route.parameters, parameters);
+      const error = openAPIParameterResolver(route.parameters, {
+        query, 
+        params
+      });
 
       if (!error) {
         debug('find: open-api-params-resolver:', error);

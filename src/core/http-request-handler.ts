@@ -97,16 +97,10 @@ export default class HTTPRequestHandler {
   }
 
   async processRoute(route: any, context: IRequestContext) {
-    try {
-      await async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
-        const services = serviceGroup.services.map((service: any) => this.processService(service, context));
-        await Promise.all(services).catch((err) => debug(err));
-      });
-    } catch (err) {
-      debug(err);
-    }
-
-    return true;
+    return async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
+      const services = serviceGroup.services.map((service: any) => this.processService(service, context));
+      await Promise.all(services).catch((err) => debug(err));
+    });
   }
 
   async processService(serviceConfig: any, context: IRequestContext) {

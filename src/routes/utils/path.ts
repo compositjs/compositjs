@@ -1,5 +1,3 @@
-
-
 import pathToRegExp from 'path-to-regexp';
 
 /**
