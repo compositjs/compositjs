@@ -57,8 +57,8 @@ export default class RoutingTable {
       const params = getPathParams(route.keys, match);
 
       const error = openAPIParameterResolver(route.parameters, {
-        query, 
-        params
+        query,
+        params,
       });
 
       if (!error) {

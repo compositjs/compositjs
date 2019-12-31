@@ -1,5 +1,5 @@
 
-import { inject, Context } from '@loopback/context';
+import { Context, inject } from '@loopback/context';
 import debugFactory from 'debug';
 import http from 'http';
 import https from 'https';
@@ -11,8 +11,8 @@ const debug = debugFactory('compositjs:server');
 const defaultServerConfig: IServerConfiguration = {
   host: '',
   port: 5000,
-  protocol: 'http'
-}
+  protocol: 'http',
+};
 
 /**
  * HTTP / HTTPS server used
@@ -36,8 +36,6 @@ export default class Server {
 
   _listener: any;
 
-  _requestHandler: any;
-
   _server: any;
 
   _serverOptions: any;
@@ -53,7 +51,7 @@ export default class Server {
     @inject(ApplicationBindings.INSTANCE) public app: Context,
     @inject(ApplicationBindings.CONFIG) config: IApplicationConfiguration,
   ) {
-    const serverConfigs: IServerConfiguration = config.server || defaultServerConfig
+    const serverConfigs: IServerConfiguration = config.server || defaultServerConfig;
     this._port = serverConfigs.port || 5000;
     this._host = serverConfigs.host || '';
     this._protocol = serverConfigs.protocol || 'http';
@@ -71,15 +69,13 @@ export default class Server {
 
     // Start listener the request and response to client
     this._listener.use(async (ctx: any, next: any) => {
+      debug('Request:', ctx.request);
+
       await httpRequestHandler.handleRequest(ctx.request, ctx.response);
       await next();
     });
 
     return this._listener;
-  }
-
-  get requestHandler() {
-    return this._requestHandler;
   }
 
   /**

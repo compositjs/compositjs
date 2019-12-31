@@ -31,9 +31,6 @@ export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPrefix: a
   });
 
   // Setting up cookies to context
-  if (headers && headers.cookie) {
-    cookie.parse(headers.cookie);
-  }
   const cookies = parseCookie(headers);
   Object.keys(cookies).forEach((key) => ctx.bind(`${svcKeyPrefix}.cookie.${key}`).to(cookies[key]));
 }

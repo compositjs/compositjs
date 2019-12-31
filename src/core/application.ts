@@ -29,9 +29,9 @@ const getDefaultConfigs = (appRootDir: string): IApplicationConfiguration => ({
   server: {
     host: '',
     port: 5000,
-    protocol: 'https'
-  }
-})
+    protocol: 'https',
+  },
+});
 
 export default class Application extends Context {
   plugins: any;
@@ -70,7 +70,7 @@ export default class Application extends Context {
       middlewares: ConfigLoader.loadPlugins(this.appConfig.middlewares) || [],
     };
 
-    debug('configurations:', this.plugins);
+    debug('plugins:', this.plugins);
   }
 
   /**
