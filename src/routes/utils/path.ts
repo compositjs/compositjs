@@ -13,7 +13,7 @@ export function convertPathToRegexp(path = '/') {
   }
 
   const tokens = parse(path);
-  Object.values(tokens).forEach((token) => {
+  Object.values(tokens).forEach((token: any) => {
     if (typeof token !== 'string' && typeof token.name === 'number') {
       throw new Error(`Unnamed parameter is not allowed in path '${path}'`);
     }

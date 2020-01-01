@@ -3,7 +3,7 @@ import Confidence from 'confidence';
 import cookie from 'cookie';
 import debugFactory from 'debug';
 import { get } from 'lodash';
-import pathToRegExp from 'path-to-regexp';
+import { compile } from 'path-to-regexp';
 import { getParamsFromContext } from '../../context';
 import { returnErrorResponse, serviceNotAvaliable, serviceTimedOut } from '../../error-handler';
 import { IRequestContext, IService } from '../../utils';
@@ -34,7 +34,7 @@ const resolveServicePath = (spec: any, context: IRequestContext) => {
 
   // Removing empty values from pathparams
   Object.keys(pathparams).forEach((key: any) => (pathparams[key] === '') && delete pathparams[key]);
-  const path = pathToRegExp.compile(spec.path)(pathparams);
+  const path = compile(spec.path)(pathparams);
 
   // Resolving query parameters
   const queryparts = Object.keys(queryparams).map((key: any) => {
@@ -78,17 +78,19 @@ const resolveServiceURL = (spec: any, context: IRequestContext) => {
 const resolveRequestConfigurations = (spec: any, context: IRequestContext) => {
   const { service } = spec;
 
-  const headerparams = getParamsFromContext(service.headers, context);
-  const isJSON = !!(headerparams['content-type'] && headerparams['content-type'].indexOf('json') > -1);
-
+  const headers = getParamsFromContext(service.headers, context);
+  
   const config: any = {
     options: {
-      json: isJSON,
       method: service.method,
-      headers: headerparams,
+      headers,
       followRedirect: false,
     },
   };
+
+  if(['GET', 'HEAD'].includes(service.method)) {
+    config.options.json = !!(headers['content-type'] && headers['content-type'].indexOf('json') > -1);
+  }
 
   config.options.timeout = service.timeout || process.env.DEFAULT_SERVICE_TIMEOUT;
 
