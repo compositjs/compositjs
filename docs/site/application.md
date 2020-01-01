@@ -30,8 +30,9 @@ const config = {
 })();
 ```
 
-|Options     | Type    |  Description                                    |
-|------------|---------|-------------------------------------------------|
+|Options         | Type    |  Description                                    |
+|----------------|---------|-------------------------------------------------|
+| `env`          | string                        | Default value is `development`. |
 | `appRoot`      | string                        | Default value is Current working dir (process.cwd()). This identifies the Application root folder     |
 | `server`       | [Server](#serverConfig)       | This configure the application server details     |
 | `routes`       | [Directory](#directoryConfig) | Optional. Default `{root}/definitions/routes/`. Define the route definition files configuration. |
