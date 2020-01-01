@@ -9,6 +9,7 @@ import { returnErrorResponse, serviceNotAvaliable, serviceTimedOut } from '../..
 import { IRequestContext, IService } from '../../utils';
 import { getServiceBreaker } from './hystrix';
 const debug = debugFactory('compositjs:service:rest-service');
+const flowDebug = debugFactory('compositjs:flow');
 
 /**
  * Resolve and build service path with path & query parameters
@@ -133,7 +134,7 @@ export default class RestService implements IService {
     let response: any = {};
 
     try {
-      console.log("Service request option:", reqConfig);
+      flowDebug('service:request', reqConfig);
       // Executing service through hystrix
       response = await this._service.execute(reqConfig.url, reqConfig.options);
     } catch (err) {

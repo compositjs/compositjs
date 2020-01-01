@@ -12,7 +12,7 @@ const { ApplicationBindings } = require('../utils');
 const debug = debugFactory('compositjs:application');
 
 const getDefaultConfigs = (appRootDir: string): IApplicationConfiguration => ({
-  enviornment: 'dev',
+  enviornment: process.env.NODE_ENV || 'development',
   routes: {
     dir: `${appRootDir}/definitions/routes/`,
     extension: '.route.json',
@@ -47,7 +47,7 @@ export default class Application extends Context {
     // default configuration values
     this.appConfig = {
       ...getDefaultConfigs(appRootDir),
-      ...config,
+      ...config
     };
 
     this.bind(ApplicationBindings.INSTANCE).to(this);
@@ -64,13 +64,10 @@ export default class Application extends Context {
 
     // Loading all plugins
     this.plugins = {
-      env: this.appConfig.enviornment || process.env.NODE_ENV || 'development',
       services: ConfigLoader.loadPlugins(this.appConfig.services) || [],
       routes: ConfigLoader.loadPlugins(this.appConfig.routes) || [],
       middlewares: ConfigLoader.loadPlugins(this.appConfig.middlewares) || [],
     };
-
-    debug('plugins:', this.plugins);
   }
 
   /**
@@ -118,6 +115,7 @@ export default class Application extends Context {
     // Register services first to accessing while route registration
     if (this.plugins.services) {
       Object.values(this.plugins.services).forEach((serviceSpec: any) => {
+        debug('binding service:', `${serviceSpec.info.name} with ${serviceSpec.service.type}`);
         this.configure(`service.${serviceSpec.info.name}`).to(serviceSpec).lock();
         const Service: Constructor<IService> = this.getSync(`service.${serviceSpec.service.type}`);
         this.bind(`service.${serviceSpec.info.name}`).toClass(Service).lock();
@@ -126,12 +124,14 @@ export default class Application extends Context {
 
     if (this.plugins.routes) {
       Object.values(this.plugins.routes).forEach((route: any) => {
+        debug('binding routes:', `${route.info.name}`);
         this.bind(`route.${route.info.name}`).to(route).lock();
       });
     }
 
     if (this.plugins.middlewares) {
       Object.keys(this.plugins.middlewares).forEach((key: any) => {
+        debug('binding middlewares:', `${ApplicationBindings.MIDDLEWARES}.${key}`);
         this
           .bind(`${ApplicationBindings.MIDDLEWARES}.${key}`)
           .to(this.plugins.middlewares[key])

@@ -6,7 +6,7 @@ import { convertPathToRegexp } from './utils/path';
 import { IRequestContext } from '../utils';
 
 const debug = debugFactory('compositjs:routing-table');
-
+const flowDebug = debugFactory('compositjs:flow');
 /**
  * Returns array of parameters from path
  *
@@ -32,7 +32,7 @@ export default class RoutingTable {
   _routes: any = [];
 
   find(requestContext: IRequestContext) {
-    let matchedRoute = null;
+    let matchedRoute: any = null;
     const reqPath = requestContext.getSync('request.path');
     const reqMethod = requestContext.getSync('request.method');
     const query = requestContext.getSync('request.query');
@@ -68,15 +68,13 @@ export default class RoutingTable {
 
       // Above all conditions true, then get path params, if any.
       matchedRoute = Object.assign(route, { pathParams: params });
-
-      if (matchedRoute) {
-        return true;
-      }
+      if (matchedRoute) return true;
 
       return false;
     });
 
     debug('find: matched-route:', matchedRoute);
+    flowDebug('route:found', matchedRoute.info);
 
     return matchedRoute;
   }

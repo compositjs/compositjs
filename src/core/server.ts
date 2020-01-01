@@ -7,6 +7,7 @@ import Koa from 'koa';
 import { ApplicationBindings, IApplicationConfiguration, IServerConfiguration } from '../utils';
 
 const debug = debugFactory('compositjs:server');
+const flowDebug = debugFactory('compositjs:flow');
 
 const defaultServerConfig: IServerConfiguration = {
   host: '',
@@ -49,7 +50,7 @@ export default class Server {
    */
   constructor(
     @inject(ApplicationBindings.INSTANCE) public app: Context,
-    @inject(ApplicationBindings.CONFIG) config: IApplicationConfiguration,
+    @inject(ApplicationBindings.CONFIG) public config: IApplicationConfiguration,
   ) {
     const serverConfigs: IServerConfiguration = config.server || defaultServerConfig;
     this._port = serverConfigs.port || 5000;
@@ -69,7 +70,7 @@ export default class Server {
 
     // Start listener the request and response to client
     this._listener.use(async (ctx: any, next: any) => {
-      debug('Request:', ctx.request);
+      flowDebug('request:url', ctx.request.url);
 
       await httpRequestHandler.handleRequest(ctx.request, ctx.response);
       await next();
@@ -83,7 +84,8 @@ export default class Server {
    */
   async start() {
     const listener = await this.setupRequestHandler();
-
+    flowDebug('starting:enviornment', this.config.enviornment);
+    
     if (this._protocol === 'https') {
       this._server = https.createServer(this._serverOptions, listener.callback());
     } else {
@@ -91,9 +93,9 @@ export default class Server {
     }
 
     this._server.listen(this._port, this._host);
-
     this._listening = true;
     this._address = this._server.address();
+    flowDebug('starting:url', this.url());
   }
 
   /**

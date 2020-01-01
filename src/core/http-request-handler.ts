@@ -8,6 +8,7 @@ import RoutingTable from '../routes/routing-table';
 import { ApplicationBindings, IRequestContext } from '../utils';
 
 const debug = debugFactory('compositjs:core:http-request-handler');
+const flowDebug = debugFactory('compositjs:flow');
 
 const buildResponse = async (route: any, context: IRequestContext, response: any) => {
   if (!route.output) {
@@ -82,7 +83,6 @@ export default class HTTPRequestHandler {
     // Finding route
     const route = this.routingTable.find(requestContext);
 
-    // If route found
     if (route) {
       // Binding path parameters with current request context
       Object.keys(route.pathParams).forEach((key) => requestContext.bind(`request.path.${key}`).to(route.pathParams[key]));
@@ -107,7 +107,7 @@ export default class HTTPRequestHandler {
     const self = this;
 
     try {
-      debug(`Processing ${serviceConfig.id} started.`);
+      flowDebug(`service:start ${serviceConfig.id}`);
 
       // Retriving service by id or serviceName
       const service: any = self.app.getSync(`service.${serviceConfig.serviceName || serviceConfig.id}`);
@@ -115,13 +115,22 @@ export default class HTTPRequestHandler {
       // Executing service
       const serviceResponse = await service.execute(context);
 
-      debug(`Processing ${serviceConfig.id} finised.`);
+      flowDebug(`service:end ${serviceConfig.id}`);
 
+      const status = serviceResponse.statusCode || serviceResponse.status || serviceResponse.body.statusCode;
+      const body = serviceResponse.body || '';
       const serviceKeyPrefix = `service.${serviceConfig.id}`;
-      context.bind(`${serviceKeyPrefix}.body`).to(serviceResponse.body || '');
-      context.bind(`${serviceKeyPrefix}.status`).to(serviceResponse.statusCode || serviceResponse.status || serviceResponse.body.statusCode);
+      const headers = serviceResponse.headers || {};
 
-      bindHeadersToContext(serviceResponse.headers || {}, context, serviceKeyPrefix);
+      context.bind(`${serviceKeyPrefix}.body`).to(body);
+      context.bind(`${serviceKeyPrefix}.status`).to(status);
+
+      bindHeadersToContext(headers, context, serviceKeyPrefix);
+
+      flowDebug(`service:response ${serviceConfig.id} status ${status}`);
+      debug(`service:response ${serviceConfig.id} headers ${headers}`);
+      debug(`service:response ${serviceConfig.id} body ${body}`);
+
     } catch (err) {
       debug(err);
     }

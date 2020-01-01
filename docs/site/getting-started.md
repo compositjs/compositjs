@@ -6,7 +6,7 @@ sidebar_label: Getting started
 
 ### Prerequisites
 
-Requires Node.js version 8.9 or higher.
+Requires Node.js version 10.x or higher.
 
 ### Getting started
 

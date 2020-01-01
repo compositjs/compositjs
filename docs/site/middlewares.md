@@ -47,7 +47,7 @@ const Application = require('compositjs');
 
 ```
 
-Another way of creating middleware, create middleware as external file and save inside `./middlewares` from root folder of the application, file extension should be `.js`. Composit JS will take all the files created inside `./middlewares` folder at booting phase.
+You able to create middlewares as external file and save in `./middlewares` folder in root. Composit JS will load all file in booting phase.
 
 e.g.
 
@@ -58,6 +58,8 @@ module.exports = async (ctx, next) => {
     await next();
 };
 ```
+
+**Note:** Composit JS using Koa framework as listener, its requrired to have `await next()` to continue the process.
 
 **Note:** Using application configuration, can change directory path and extension of middleware files. See more [here](application.md#applicationConfiguration).
 
