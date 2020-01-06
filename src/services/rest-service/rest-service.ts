@@ -2,10 +2,10 @@ import { config } from '@loopback/context';
 import Confidence from 'confidence';
 import cookie from 'cookie';
 import debugFactory from 'debug';
-import { get } from 'lodash';
+import { get, merge, pick } from 'lodash';
 import { compile } from 'path-to-regexp';
 import { getParamsFromContext } from '../../context';
-import { returnErrorResponse, serviceNotAvaliable, serviceTimedOut } from '../../error-handler';
+import { serviceNotAvaliable, serviceTimedOut } from '../../error-handler';
 import { IRequestContext, IService } from '../../utils';
 import { getServiceBreaker } from './hystrix';
 const debug = debugFactory('compositjs:service:rest-service');
@@ -33,9 +33,15 @@ const resolveServicePath = (spec: any, context: IRequestContext) => {
     queryparams = getParamsFromContext(spec.parameters.query, context);
   }
 
+  console.log('queryparams:', queryparams)
+
   // Removing empty values from pathparams
   Object.keys(pathparams).forEach((key: any) => (pathparams[key] === '') && delete pathparams[key]);
-  const path = compile(spec.path)(pathparams);
+
+  // Removing leading slash from pathparams
+  Object.keys(pathparams).forEach((key: any) => pathparams[key].replace(/^\/+/g, ''));
+
+  const path = compile(spec.path, { validate: false })(pathparams);
 
   // Resolving query parameters
   const queryparts = Object.keys(queryparams).map((key: any) => {
@@ -76,11 +82,12 @@ const resolveServiceURL = (spec: any, context: IRequestContext) => {
 /**
  * Building request options from JSON configuration file
  */
-const resolveRequestConfigurations = (spec: any, context: IRequestContext) => {
-  const { service } = spec;
+const resolveRequestConfigurations = (spec: any, context: IRequestContext, parameters: any) => {
+
+  const service = merge(spec.service, pick(parameters, ['headers', 'cookies', 'parameters']));
 
   const headers = getParamsFromContext(service.headers, context);
-  
+
   const config: any = {
     options: {
       method: service.method,
@@ -89,7 +96,7 @@ const resolveRequestConfigurations = (spec: any, context: IRequestContext) => {
     },
   };
 
-  if(['GET', 'HEAD'].includes(service.method)) {
+  if (['GET', 'HEAD'].includes(service.method)) {
     config.options.json = !!(headers['content-type'] && headers['content-type'].indexOf('json') > -1);
   }
 
@@ -128,15 +135,14 @@ export default class RestService implements IService {
   }
 
   // Execute for RestService
-  async execute(context: IRequestContext) {
-
-    const reqConfig = resolveRequestConfigurations(this.spec, context);
+  async execute(context: IRequestContext, parameters?: any) {
+    const requestConfig = resolveRequestConfigurations(this.spec, context, parameters);
     let response: any = {};
 
     try {
-      flowDebug('service:request', reqConfig);
+      flowDebug('service:request', requestConfig);
       // Executing service through hystrix
-      response = await this._service.execute(reqConfig.url, reqConfig.options);
+      response = await this._service.execute(requestConfig.url, requestConfig.options);
     } catch (err) {
       let error = {};
 
@@ -150,21 +156,15 @@ export default class RestService implements IService {
         error = serviceTimedOut(err, this.spec);
       }
 
-      // Assigning refactored error to response
-      response = returnErrorResponse(error);
-
       if (this.spec.service.fallback) {
         debug(`fallback for service(${this.spec.info.name})`, response);
 
-        // TODO: setup logging
-        console.log(`fallback for service(${this.spec.info.name})`, response.body.message);
-
         // Setting fallback data as response body
-        response.body = this.spec.service.fallback;
+        response.body = this.spec.service.fallback.body ? this.spec.service.fallback.body : this.spec.service.fallback;
 
         // TODO: should control through flag(ENV or global setting) to
         // change the status code of fallback(ed) responses.
-        response.status = 200;
+        response.status = this.spec.service.fallback.status ? this.spec.service.fallback.status : 200;
       }
     }
 

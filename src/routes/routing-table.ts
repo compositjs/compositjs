@@ -1,9 +1,9 @@
 
 import debugFactory from 'debug';
 import * as _ from 'lodash';
+import { IRequestContext } from '../utils';
 import openAPIParameterResolver from './openapi';
 import { convertPathToRegexp } from './utils/path';
-import { IRequestContext } from '../utils';
 
 const debug = debugFactory('compositjs:routing-table');
 const flowDebug = debugFactory('compositjs:flow');
@@ -73,8 +73,8 @@ export default class RoutingTable {
       return false;
     });
 
-    debug('find: matched-route:', matchedRoute);
-    flowDebug('route:found', matchedRoute.info);
+    if (!matchedRoute)
+      flowDebug('route:found', matchedRoute.info);
 
     return matchedRoute;
   }

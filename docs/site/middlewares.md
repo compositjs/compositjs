@@ -21,7 +21,7 @@ const Application = require('compositjs');
         },
         appRoot: __dirname
     };
-      
+
     const application = new Application(config);
 
     application.use(async (ctx, next) => {
@@ -38,11 +38,11 @@ const Application = require('compositjs');
         console.log(`common ${ctx.method} ${ctx.url} - ${ms}ms`);
       });
     });
-    
+
     await application.start();
 
     console.log("Server start at:", application.server.url());
-      
+
 })();
 
 ```

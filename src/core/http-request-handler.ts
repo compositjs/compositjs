@@ -51,6 +51,10 @@ const buildResponse = async (route: any, context: IRequestContext, response: any
     response.body = context.getSync(`service.${route.output.service}.body`);
   }
 
+  if (!response.body && route.output.fallback) {
+    response.body = getParamsFromContext(route.output.fallback, context);
+  }
+
   response.status = route.output.status ? +getParamsFromContext(route.output.status, context) : 200;
 
   return response;
@@ -98,8 +102,11 @@ export default class HTTPRequestHandler {
 
   async processRoute(route: any, context: IRequestContext) {
     return async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
-      const services = serviceGroup.services.map((service: any) => this.processService(service, context));
-      await Promise.all(services).catch((err) => debug(err));
+      return Promise
+        .all(serviceGroup.services.map((serviceConfig: any) => {
+          return this.processService(serviceConfig, context);
+        }))
+        .catch((err) => debug(err));
     });
   }
 
@@ -113,7 +120,7 @@ export default class HTTPRequestHandler {
       const service: any = self.app.getSync(`service.${serviceConfig.serviceName || serviceConfig.id}`);
 
       // Executing service
-      const serviceResponse = await service.execute(context);
+      const serviceResponse = await service.execute(context, serviceConfig);
 
       flowDebug(`service:end ${serviceConfig.id}`);
 
@@ -122,7 +129,12 @@ export default class HTTPRequestHandler {
       const serviceKeyPrefix = `service.${serviceConfig.id}`;
       const headers = serviceResponse.headers || {};
 
-      context.bind(`${serviceKeyPrefix}.body`).to(body);
+      if (serviceResponse.headers['content-type'].indexOf('application/json') > -1) {
+        context.bind(`${serviceKeyPrefix}.body`).to(JSON.parse(body));
+      } else {
+        context.bind(`${serviceKeyPrefix}.body`).to(body);
+      }
+
       context.bind(`${serviceKeyPrefix}.status`).to(status);
 
       bindHeadersToContext(headers, context, serviceKeyPrefix);

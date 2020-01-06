@@ -1,5 +1,3 @@
-
-
 import got from 'got';
 const Hystrixjs = require('hystrixjs');
 

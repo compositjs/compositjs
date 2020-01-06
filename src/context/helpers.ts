@@ -1,6 +1,7 @@
 import { Context } from '@loopback/context';
 import cookie from 'cookie';
 import debugFactory from 'debug';
+import { get } from 'lodash';
 import setCookie from 'set-cookie-parser';
 import { CONTEXT_PREFIX } from '../utils';
 
@@ -35,6 +36,18 @@ export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPrefix: a
   Object.keys(cookies).forEach((key) => ctx.bind(`${svcKeyPrefix}.cookie.${key}`).to(cookies[key]));
 }
 
+function extractKeyFromContext(key: string, context: Context) {
+  const bindKey = key.replace(CONTEXT_PREFIX, '');
+  // If value retriving from body content
+  if (bindKey.indexOf(".body.") > 0) {
+    const bodyBindKey = bindKey.split(".body.");
+    const body = context.getSync(bodyBindKey[0] + ".body");
+    return get(body, bodyBindKey[1], '');
+  }
+
+  return context.getSync(bindKey);
+}
+
 /**
  * This function returns resolved paramters which defined in service configuration.
  *
@@ -65,22 +78,31 @@ export function getParamsFromContext(params: any, context: Context) {
   if (!params) return result;
 
   // If params type is a string and which is able to accessing directly from context
-  if (params && typeof params === 'string' && params.substring(0, 2) === CONTEXT_PREFIX) {
-    return context.getSync(params.replace(CONTEXT_PREFIX, ''));
+  if (params && typeof params === 'string') {
+    if (params.substring(0, 2) === CONTEXT_PREFIX) {
+      return extractKeyFromContext(params, context);
+    } else {
+      return params;
+    }
   }
 
   Object.keys(params).forEach((paramkey: any) => {
     const parameter: any = params[paramkey];
     try {
-      const value = parameter.value || parameter;
+      let value = parameter.value || parameter;
       if (typeof value !== 'string') {
         throw new Error(`${paramkey} parameter not defined properly.`);
       }
 
       // If value accessing from context variable then start with `$.`
       if (value && value.substring(0, 2) === CONTEXT_PREFIX) {
-        result[`${paramkey}`] = context.getSync(value.replace(CONTEXT_PREFIX, ''));
+        result[`${paramkey}`] = extractKeyFromContext(value, context);
       } else {
+        const matches = value.match(/{{([^}]+)}}/g);
+        if (matches) {
+          matches.map((key) => value = value.replace(key, extractKeyFromContext(key.replace(/{{|}}/g, '').trim(), context)));
+        }
+
         result[`${paramkey}`] = value;
       }
     } catch (e) {

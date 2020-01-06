@@ -31,7 +31,10 @@ export interface IApplicationConfiguration {
  */
 export interface IService {
 
-  execute(context: Context): Promise<void>
+  execute(
+    context: Context,
+    parameters?: any
+  ): Promise<void>
 }
 
 /**
