@@ -102,10 +102,7 @@ export default class HTTPRequestHandler {
 
   async processRoute(route: any, context: IRequestContext) {
     return async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
-      return Promise
-        .all(serviceGroup.services.map((serviceConfig: any) => {
-          return this.processService(serviceConfig, context);
-        }))
+      return Promise.all(serviceGroup.services.map((serviceConfig: any) => this.processService(serviceConfig, context)))
         .catch((err) => debug(err));
     });
   }
@@ -129,7 +126,7 @@ export default class HTTPRequestHandler {
       const serviceKeyPrefix = `service.${serviceConfig.id}`;
       const headers = serviceResponse.headers || {};
 
-      if (serviceResponse.headers['content-type'].indexOf('application/json') > -1) {
+      if (serviceResponse.headers && serviceResponse.headers['content-type'].indexOf('application/json') > -1) {
         context.bind(`${serviceKeyPrefix}.body`).to(JSON.parse(body));
       } else {
         context.bind(`${serviceKeyPrefix}.body`).to(body);

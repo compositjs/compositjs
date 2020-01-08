@@ -117,7 +117,7 @@ const resolveRequestConfigurations = (spec: any, context: IRequestContext, param
       throw new Error('Service sepecification host and path is required, if URL is not define.');
     }
 
-    config.url = resolveServiceURL(service, context);
+    config.uri = resolveServiceURL(service, context);
   }
 
   debug('Request config:', config);
@@ -142,7 +142,7 @@ export default class RestService implements IService {
     try {
       flowDebug('service:request', requestConfig);
       // Executing service through hystrix
-      response = await this._service.execute(requestConfig.url, requestConfig.options);
+      response = await this._service.execute(requestConfig);
     } catch (err) {
       let error = {};
 
@@ -156,7 +156,9 @@ export default class RestService implements IService {
         error = serviceTimedOut(err, this.spec);
       }
 
-      if (this.spec.service.fallback) {
+      const fallback = this.spec.service.fallback;
+
+      if (fallback && err.statusCode && fallback[err.statusCode]) {
         debug(`fallback for service(${this.spec.info.name})`, response);
 
         // Setting fallback data as response body
@@ -165,6 +167,10 @@ export default class RestService implements IService {
         // TODO: should control through flag(ENV or global setting) to
         // change the status code of fallback(ed) responses.
         response.status = this.spec.service.fallback.status ? this.spec.service.fallback.status : 200;
+      } else {
+        console.log(err.statusCode, err.status, err.code)
+        response.body = err.message;
+        response.status = err.statusCode || 500;
       }
     }
 
