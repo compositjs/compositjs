@@ -1,8 +1,5 @@
-// import got from 'got';
-// import request from 'request';
+const axios = require('axios').default;
 const Hystrixjs = require('hystrixjs');
-// const util = require('util');
-const rp = require('request-promise');
 
 const HystrixCommand: any = Hystrixjs.commandFactory;
 
@@ -15,13 +12,6 @@ const circuitBreakerDefaults: any = {
   volumeThreshold: 5,
 };
 
-const autoParse = (body: any, response: any) => response
-
-const makeRequest = (options: any) => {
-  options.transform = autoParse;
-  return rp(options);
-}
-
 export function getServiceBreaker(service: any) {
   const options = Object.assign({}, circuitBreakerDefaults, service.circuitBreaker);
 
@@ -32,7 +22,7 @@ export function getServiceBreaker(service: any) {
     .circuitBreakerErrorThresholdPercentage(options.errorThreshold)
     .circuitBreakerRequestVolumeThreshold(options.volumeThreshold)
     .circuitBreakerSleepWindowInMilliseconds(options.timeout)
-    .run(makeRequest)
+    .run(axios)
     .errorHandler((err: any) => {
       if (err && (options.errorCodes.indexOf((err.statusCode || 503).toString()) || err.code === 'ENOTFOUND')) {
         return err; // just return it, to confirm it is a valid error for circuit breaker

@@ -22,12 +22,11 @@
   },
   "dependencies": {
     "@loopback/context": "^1.25.0",
-    "@types/request": "^2.48.4",
     "async": "^3.1.0",
+    "axios": "^0.19.2",
     "confidence": "^4.0.2",
     "cookie": "^0.4.0",
     "debug": "^4.1.1",
-    "got": "^10.2.0",
     "http-errors": "^1.7.3",
     "hystrixjs": "^0.2.0",
     "koa": "^2.11.0",
@@ -36,9 +35,6 @@
     "openapi-request-coercer": "^2.4.0",
     "openapi-request-validator": "^4.2.0",
     "path-to-regexp": "^6.1.0",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.4",
-    "rxjs": "^6.5.4",
     "set-cookie-parser": "^2.4.1",
     "typescript": "^3.7.4"
   },

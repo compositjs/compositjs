@@ -102,8 +102,8 @@ export default class HTTPRequestHandler {
 
   async processRoute(route: any, context: IRequestContext) {
     return async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
-      return Promise.all(serviceGroup.services.map((serviceConfig: any) => this.processService(serviceConfig, context)))
-        .catch((err) => debug(err));
+      const services = serviceGroup.services.map((serviceConfig: any) => this.processService(serviceConfig, context));
+      return Promise.all(services).catch((err) => debug(err));
     });
   }
 
@@ -117,28 +117,25 @@ export default class HTTPRequestHandler {
       const service: any = self.app.getSync(`service.${serviceConfig.serviceName || serviceConfig.id}`);
 
       // Executing service
-      const serviceResponse = await service.execute(context, serviceConfig);
+      const response = await service.execute(context, serviceConfig);
 
-      flowDebug(`service:end ${serviceConfig.id}`);
-
-      const status = serviceResponse.statusCode || serviceResponse.status || serviceResponse.body.statusCode;
-      const body = serviceResponse.body || '';
+      const status = response.statusCode || response.status || response.body.statusCode;
+      const body = response.body || '';
       const serviceKeyPrefix = `service.${serviceConfig.id}`;
-      const headers = serviceResponse.headers || {};
-
-      if (serviceResponse.headers && serviceResponse.headers['content-type'].indexOf('application/json') > -1) {
-        context.bind(`${serviceKeyPrefix}.body`).to(JSON.parse(body));
-      } else {
-        context.bind(`${serviceKeyPrefix}.body`).to(body);
-      }
+      const headers = response.headers || {};
 
       context.bind(`${serviceKeyPrefix}.status`).to(status);
 
       bindHeadersToContext(headers, context, serviceKeyPrefix);
 
+      if (response.headers && response.headers['content-type'].indexOf('application/json') > -1) {
+        context.bind(`${serviceKeyPrefix}.body`).to(JSON.parse(body));
+      } else {
+        context.bind(`${serviceKeyPrefix}.body`).to(body);
+      }
+
       flowDebug(`service:response ${serviceConfig.id} status ${status}`);
-      debug(`service:response ${serviceConfig.id} headers ${headers}`);
-      debug(`service:response ${serviceConfig.id} body ${body}`);
+      debug(`service:response ${serviceConfig.id} ${response}`);
 
     } catch (err) {
       debug(err);

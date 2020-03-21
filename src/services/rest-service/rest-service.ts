@@ -92,7 +92,8 @@ const resolveRequestConfigurations = (spec: any, context: IRequestContext, param
     options: {
       method: service.method,
       headers,
-      followRedirect: false,
+      maxRedirects: 0,
+      validateStatus: (status: number) => status <= 302
     },
   };
 
@@ -117,7 +118,7 @@ const resolveRequestConfigurations = (spec: any, context: IRequestContext, param
       throw new Error('Service sepecification host and path is required, if URL is not define.');
     }
 
-    config.uri = resolveServiceURL(service, context);
+    config.url = resolveServiceURL(service, context);
   }
 
   debug('Request config:', config);
@@ -142,8 +143,10 @@ export default class RestService implements IService {
     try {
       flowDebug('service:request', requestConfig);
       // Executing service through hystrix
-      response = await this._service.execute(requestConfig);
+      response = await this._service.execute({ ...requestConfig.options, url: requestConfig.url });
+
     } catch (err) {
+
       let error = {};
 
       // For the 'rest' service execution, Hystrix will return error if circute breaker is opended
@@ -168,7 +171,6 @@ export default class RestService implements IService {
         // change the status code of fallback(ed) responses.
         response.status = this.spec.service.fallback.status ? this.spec.service.fallback.status : 200;
       } else {
-        console.log(err.statusCode, err.status, err.code)
         response.body = err.message;
         response.status = err.statusCode || 500;
       }
