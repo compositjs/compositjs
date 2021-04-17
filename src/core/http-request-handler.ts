@@ -1,66 +1,148 @@
 
-import { Context, inject } from '@loopback/context';
-import async from 'async';
+import { Binding, Context, ContextEventType, ContextView, inject } from '@loopback/context';
 import cookie from 'cookie';
 import debugFactory from 'debug';
-import { bindHeadersToContext, getParamsFromContext, RequestContext } from '../context';
+import { isEqual } from 'lodash';
+import { extractHeadersAndCookies, getParamsFromContext, RequestContext } from '../context';
 import RoutingTable from '../routes/routing-table';
-import { ApplicationBindings, IRequestContext } from '../utils';
+import { ApplicationBindings, IRequestContext, RequestBindings, RouteBindings, ServiceBindings } from '../utils';
+import { processActions } from './conditions';
 
 const debug = debugFactory('compositjs:core:http-request-handler');
 
-const buildResponse = async (route: any, context: IRequestContext, response: any) => {
-  if (!route.output) {
+const servicesFilter = (binding: Readonly<Binding<unknown>>) => binding.tagMap.service != null;
+
+const buildResponse = (context: IRequestContext, response: any) => {
+  const output: any = context.getSync(RouteBindings.ROUTE_OUTPUT);
+  if (!output) {
     throw new Error('Output not defined in route');
   }
 
-  const headerparams = getParamsFromContext(route.output.headers, context);
+  let serviceResponse: any = null;
+  const headerparams = getParamsFromContext(output.headers, context);
   Object.keys(headerparams).map((headerparam) => response.set(headerparam, headerparams[headerparam]));
 
   const newCookies: any = [];
-  const cookieparams = getParamsFromContext(route.output.cookies, context);
-  Object.keys(cookieparams).map((cookiename) => newCookies.push(cookie.serialize(cookiename, cookieparams[cookiename].value, cookieparams[cookiename])));
+  const cookieparams = getParamsFromContext(output.cookies, context);
+  for (const cookiename in cookieparams) {
+    newCookies.push(cookie.serialize(cookiename, cookieparams[cookiename], cookieparams[cookiename]))
+  }
 
   if (newCookies.length > 0) {
     response.set('set-cookie', [...newCookies]);
   }
 
   // Combining all services output as JSON object
-  if (route.output.strategy === 'composit') {
+  if (output.strategy === 'composit') {
     const compositBody: any = {};
-    const s: any = [];
-    context.findByTag(new RegExp(/^service\.(.+)/)).map((binding: any) => s.push(...binding.tagNames));
-    let outputServices: any = null;
+    let outputServices: string[] = [];
 
     // If no services mentioned take all services
-    if (!route.output.services) {
-      outputServices = [...Array.from(new Set(s))].map((serviceKey: any) => serviceKey.replace('service.', ''));
+    if (!output.services) {
+      outputServices = context.findByTag(ServiceBindings.SERVICE_TAG_NAME).map((bind: Readonly<Binding<unknown>>) => bind.key)
     } else {
-      outputServices = route.output.services;
+      outputServices = output.services;
     }
-
-    Object.values(outputServices).forEach((service: any) => {
-      compositBody[service] = context.getSync(`service.${service}.body`);
+    outputServices.map((service: string) => {
+      try {
+        serviceResponse = context.getSync(service)
+        console.log(service, serviceResponse)
+        compositBody[service] = serviceResponse.body
+      } catch (err) {
+        console.log('err', service)
+        compositBody[service] = '';
+      }
     });
 
     response.body = compositBody;
-
+    response.status = output.status ? +getParamsFromContext(output.status, context) : 200;
     // Straight forward output from given service
-  } else if (route.output.strategy === 'standard') {
-    response.body = context.getSync(`service.${route.output.service}.body`);
+  } else if (output.strategy === 'standard') {
+    serviceResponse = context.getSync(output.service)
+    response.body = serviceResponse.body;
+    response.status = output.status ? +getParamsFromContext(output.status, context) : 200;
+  } else if (output.body) {
+    response.body = output.body;
+    response.status = output.status ? +(output.status) : 200;
   }
-
-  response.status = route.output.status ? +getParamsFromContext(route.output.status, context) : 200;
 
   return response;
 };
+
+const serviceObserver = (abortController: AbortController, serviceView: ContextView) => {
+  return {
+    // Only interested in bindings tagged with `foo`
+    filter: (binding: Readonly<Binding<unknown>>) => binding.tagMap.service != null,
+
+    observe(event: ContextEventType, binding: Readonly<Binding<unknown>>, context: Context) {
+      if (event === 'bind') {
+        console.log('executed: %s %s', context.name, binding.key);
+      }
+    },
+  }
+};
+
+const processService = async (serviceConfig: any, context: IRequestContext, ac: AbortController) => {
+  let body = '';
+  try {
+    debug(`Processing ${serviceConfig.id} started.`);
+    let serviceOutput: any = {}
+    const preActionKey: string = ServiceBindings.SERVICE_PRE_ACTION_KEY(serviceConfig.id)
+    const preActionResponse: any = <any>await processActions(serviceConfig, context, preActionKey)
+    if (preActionResponse) {
+      serviceOutput = { ...preActionResponse }
+    } else {
+      // Retriving service by id or serviceName
+      const service: any = await context.get(`service.${serviceConfig.id}`);
+
+      // Executing service
+      const serviceResponse = await service.execute(context, { ...serviceConfig });
+
+      debug(`Processing ${serviceConfig.id} finised.`);
+      const { cookies, headers } = extractHeadersAndCookies(serviceResponse.headers || {});
+      serviceOutput.cookies = cookies
+      serviceOutput.headers = headers
+
+      if (serviceResponse.body.constructor.name === "RequestResponse") {
+        serviceResponse.body.setEncoding('utf8')
+        for await (const data of serviceResponse.body) {
+          body = data;
+        }
+
+        // If headers accept defined, and it is JSON then parse the body
+        if (typeof headers['content-type'] == "string" && headers['content-type'].indexOf('application/json') > -1) {
+          body = JSON.parse(body);
+        }
+      } else {
+        body = serviceResponse.body;
+      }
+      serviceOutput.body = body
+      serviceOutput.status = serviceResponse.statusCode || serviceResponse.status || serviceResponse.body.statusCode
+    }
+    const postActionKey: string = ServiceBindings.SERVICE_POST_ACTION_KEY(serviceConfig.id)
+    const postActionResponse: any = <any>await processActions(serviceConfig, context, postActionKey)
+    if (postActionResponse) {
+      serviceOutput = { ...postActionResponse }
+    }
+
+    if (serviceOutput.stopServiceFlowExecution) {
+      context.bind(RouteBindings.ROUTE_OUTPUT).to({ ...serviceOutput.output });
+      ac.abort()
+    }
+    context.bind(serviceConfig.id).to(serviceOutput.output || serviceOutput).tag(ServiceBindings.SERVICE_TAG_NAME);
+
+  } catch (err) {
+    debug(err);
+    throw err;
+  }
+}
 
 /**
  *
  * @param {*} server
  */
 export default class HTTPRequestHandler {
-  routingTable: any;
+  routingTable: RoutingTable;
 
   /**
    * Request handler
@@ -71,59 +153,57 @@ export default class HTTPRequestHandler {
    */
   constructor(@inject(ApplicationBindings.INSTANCE) public app: Context) {
     this.routingTable = new RoutingTable();
-
-    Object.values(app.find('route.*')).forEach((specs: any) => this.routingTable.register(specs.getValue()));
-  }
-
-  async handleRequest(request: any, response: any) {
-    // Creating RequestContext
-    const requestContext: IRequestContext = new RequestContext(request, response);
-
-    // Finding route
-    const route = this.routingTable.find(requestContext);
-
-    // If route found
-    if (route) {
-      // Binding path parameters with current request context
-      Object.keys(route.pathParams).forEach((key) => requestContext.bind(`request.path.${key}`).to(route.pathParams[key]));
-
-      await this.processRoute(route, requestContext);
-
-      await buildResponse(route, requestContext, response);
-    } else {
-      response.body = '';
-      response.status = 404;
-    }
-  }
-
-  async processRoute(route: any, context: IRequestContext) {
-    return async.eachSeries(route.serviceGroups, async (serviceGroup: any) => {
-      const services = serviceGroup.services.map((service: any) => this.processService(service, context));
-      await Promise.all(services).catch((err) => debug(err));
+    Object.values(app.find('route.*')).forEach((specs: any) => {
+      this.routingTable.register(specs.getValue(app))
     });
   }
 
-  async processService(serviceConfig: any, context: IRequestContext) {
-    const self = this;
+  async handleRequest(request: any, response: any) {
+    const self = this
+    return new Promise<void>(async (resolve, reject) => {
+      const ac = new AbortController();
+      const signal = ac.signal;
+      // Creating RequestContext
+      const requestContext: IRequestContext = new RequestContext(this.app, request, response);
+      const serviceView: ContextView = requestContext.createView(servicesFilter);
+      requestContext.subscribe(serviceObserver(ac, serviceView))
 
-    try {
-      debug(`Processing ${serviceConfig.id} started.`);
+      // Finding route
+      const route: any = this.routingTable.find(requestContext);
+      requestContext.bind(RouteBindings.ROUTE_OUTPUT).to(route.output);
 
-      // Retriving service by id or serviceName
-      const service: any = self.app.getSync(`service.${serviceConfig.serviceName || serviceConfig.id}`);
+      if (route) {
+        const nonDependedServices: object[] = route.services.filter((service: any) => !service.dependsOn)
+        const dependedServices: object[] = route.services.filter((service: any) => service.dependsOn)
 
-      // Executing service
-      const serviceResponse = await service.execute(context);
+        // Binding path parameters with current request context
+        const requestParams: any = requestContext.getSync(RequestBindings.REQUEST_PARAMS)
+        requestParams.params = route.pathParams
+        requestContext.bind(RequestBindings.REQUEST_PARAMS).to(requestParams).tag(RequestBindings.REQUEST_TAG_NAME);
 
-      debug(`Processing ${serviceConfig.id} finised.`);
+        serviceView.on("bind", async () => {
+          const services: object[] = <object[]>await serviceView.values();
+          const completedServices: string[] = serviceView.bindings.map(bind => bind.key);
 
-      const serviceKeyPrefix = `service.${serviceConfig.id}`;
-      context.bind(`${serviceKeyPrefix}.body`).to(serviceResponse.body || '');
-      context.bind(`${serviceKeyPrefix}.status`).to(serviceResponse.statusCode || serviceResponse.status || serviceResponse.body.statusCode);
+          if (services.length == route.services.length || signal.aborted) {
+            buildResponse(requestContext, response);
+            resolve();
+          } else {
+            dependedServices.map((service: any) => {
+              if (isEqual(service.dependsOn.sort(), completedServices.sort())) {
+                return processService(service, requestContext, ac);
+              }
+            })
+          }
+        })
 
-      bindHeadersToContext(serviceResponse.headers || {}, context, serviceKeyPrefix);
-    } catch (err) {
-      debug(err);
-    }
+        nonDependedServices.map((service: any) => processService(service, requestContext, ac));
+
+      } else {
+        response.body = '';
+        response.status = 404;
+        resolve();
+      }
+    })
   }
 }

@@ -1,51 +1,59 @@
 
 import { Context } from '@loopback/context';
-import url from 'url';
-import { IRequestContext } from '../utils';
-import { bindHeadersToContext } from './helpers';
+import { URL } from 'url';
+import { IRequestContext, RequestBindings } from '../utils';
+import { extractHeadersAndCookies } from './helpers';
 
 const querystring = require('querystring');
 
 export default class RequestContext extends Context implements IRequestContext {
   constructor(
+    public app: Context,
     public req: any,
     public res: any,
   ) {
-    super();
+    super(app);
 
-    this._populateHeaderVariables();
-    this._populateRequestVariables();
+    const { cookies, headers } = this._processRequestHeaders();
+    const params = this._processRequestParams();
+
+    this.bind(RequestBindings.REQUEST_PARAMS).to({ cookies, headers, params }).tag(RequestBindings.REQUEST_TAG_NAME);
   }
 
-  _populateHeaderVariables() {
+  _processRequestHeaders(): any {
     // If no x-request-id header available then setting context UUID as x-request-id
     if (this.req && this.req.headers && !this.req.headers['x-request-id']) {
       this.req.headers['x-request-id'] = this.name;
     }
 
     // Biniding request headers to this requestcontext with the prefix of `request`
-    bindHeadersToContext(this.req.headers, this, 'request');
+    return extractHeadersAndCookies(this.req.headers);
   }
 
-  _populateRequestVariables() {
-    // The HTTP verb of this request.
-    this.bind('request.method').to(this.req.method.toLowerCase());
-
+  _processRequestParams() {
     // The full HTTP request URI from the application.
-    this.bind('request.uri').to(`${this.req.protocol}://${this.req.get('host')}${this.req.originalUrl}`);
+    const uri = `${this.req.protocol}://${this.req.get('host')}${this.req.originalUrl}`
+    const urlParsed = new URL(uri);
+    const queryString = urlParsed.searchParams.toString()
 
-    const urlParsed = url.parse(this.req.url, false);
+    const requestParams: any = {
+      method: this.req.method.toLowerCase(),
+      uri: uri,
+      path: urlParsed.pathname,
+      search: urlParsed.search || '',
+      querystring: queryString || '',
+      query: querystring.decode(queryString) || {},
+      queryParams: {},
+      'content-type': this.req.get('content-type') || '',
+      date: new Date(),
+      body: this.req.body || ''
+    }
 
-    this.bind('request.path').to(urlParsed.pathname);
-    this.bind('request.search').to(urlParsed.search || '');
-    this.bind('request.querystring').to(urlParsed.query || '');
-    this.bind('request.query').to(querystring.decode(urlParsed.query) || {});
+    const query = (querystring.decode(queryString) || {});
+    for (const key in query) {
+      requestParams.queryParams[key] = query[key]
+    }
 
-    const query = (querystring.decode(urlParsed.query) || {});
-    Object.keys(query).forEach((key) => this.bind(`request.query.${key}`).to(query[key]));
-
-    this.bind('request.content-type').to(this.req.get('content-type') || '');
-    this.bind('request.date').to(new Date());
-    this.bind('request.body').to(this.req.body || Buffer.from([]));
+    return requestParams
   }
 }

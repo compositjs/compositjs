@@ -1,10 +1,9 @@
 
 import debugFactory from 'debug';
-import * as _ from 'lodash';
-import openAPIParameterResolver from './openapi';
-import { convertPathToRegexp } from './utils/path';
+import { omit } from 'lodash';
+import NodeCache from 'node-cache';
 import { IRequestContext } from '../utils';
-
+import { convertPathToRegexp } from './utils/path';
 const debug = debugFactory('compositjs:routing-table');
 
 /**
@@ -30,52 +29,54 @@ const getPathParams = (routeKeys: any, routeMatch: any) => {
  */
 export default class RoutingTable {
   _routes: any = [];
+  _cache: any = new NodeCache();
 
   find(requestContext: IRequestContext) {
-    let matchedRoute = null;
-    const reqPath = requestContext.getSync('request.path');
-    const reqMethod = requestContext.getSync('request.method');
-    const query = requestContext.getSync('request.query');
+    const requestParams: any = requestContext.getSync('request')
+    const reqPath = requestParams.params.path;
+    const reqMethod = requestParams.params.method;
+    // const query = requestParams.params.query;
+    const key = `${reqMethod}-${reqPath}`
 
-    Object.values(this._routes).some((route: any) => {
-      debug('find: route:', route.info.name);
+    let matchedRoute = this._cache.get(key) || null
+    if (!matchedRoute) {
+      this._routes.some((route: any) => {
+        debug('find: route:', route.info.name);
 
-      // Validating method e.g. GET, POST etc
-      if (route.method.toLowerCase() !== reqMethod) {
-        debug('find: method-validation:', false);
-        return false;
-      }
+        // Validating method e.g. GET, POST etc
+        if (route.method.toLowerCase() !== reqMethod) {
+          debug('find: method-validation:', false);
+          return false;
+        }
 
-      // Validating route path
-      const match = route.regexp.exec(reqPath);
-      if (!match) {
-        debug('find: path-validation:', match);
-        return false;
-      }
+        // Validating route path
+        const match = route.regexp.exec(reqPath);
+        if (!match) {
+          debug('find: path-validation:', match);
+          return false;
+        }
 
-      // Retrive path parameters for the selected route.
-      const params = getPathParams(route.keys, match);
+        // Retrive path parameters for the selected route.
+        const params = getPathParams(route.keys, match);
 
-      const error = openAPIParameterResolver(route.parameters, {
-        query,
-        params,
-      });
+        /** DISABLING FOR TIME BEING, DUE TO PERFORMANCE ISSUE */
+        // const error = openAPIParameterResolver(route.parameters, {
+        //   query,
+        //   params,
+        // });
 
-      if (!error) {
-        debug('find: open-api-params-resolver:', error);
-        return false;
-      }
+        // if (!error) {
+        //   debug('find: open-api-params-resolver:', error);
+        //   return false;
+        // }
 
-      // Above all conditions true, then get path params, if any.
-      matchedRoute = Object.assign(route, { pathParams: params });
+        // Above all conditions true, then get path params, if any.
+        matchedRoute = Object.assign(route, { pathParams: params });
+        this._cache.set(key, matchedRoute)
 
-      if (matchedRoute) {
         return true;
-      }
-
-      return false;
-    });
-
+      });
+    }
     debug('find: matched-route:', matchedRoute);
 
     return matchedRoute;
@@ -93,6 +94,7 @@ export default class RoutingTable {
       parameters: route.definition.parameters,
       output: route.output,
       serviceGroups,
+      services: route.services
     });
 
     this._routes.push(routeData);
@@ -116,7 +118,7 @@ export default class RoutingTable {
       }
 
       route.services.map((service: any) => {
-        serviceGroups[index].services.push({ ..._.omit(service, ['services']) });
+        serviceGroups[index].services.push({ ...omit(service, ['services']) });
         return this.createServicesToGroups(service, serviceGroups, index + 1);
       });
     }

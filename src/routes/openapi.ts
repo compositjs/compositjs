@@ -1,8 +1,8 @@
 
 import debugFactory from 'debug';
 import OpenAPIDefaultSetter from 'openapi-default-setter';
-import OpenAPIRequestValidator from 'openapi-request-validator';
 import OpenAPIRequestCoercer from 'openapi-request-coercer';
+import OpenAPIRequestValidator from 'openapi-request-validator';
 
 const debug = debugFactory('compositjs:routing-table:open-api');
 
@@ -33,10 +33,20 @@ export default function openAPIParameterResolver(parameters: any, requestParamet
   // Effortlessly coerce header, path, query and formData request properties
   // to defined types in an openapi parameters list.
   new OpenAPIRequestCoercer({ parameters }).coerce(requestParameters);
-  
+
   // Validate parameters
+  const jsonSchema: any = {
+    query: {},
+    params: {}
+  }
+  const accumParams = parameters.reduce((accum: any, param: any) => {
+    if (!accum[param.in]) accum[param.in] = []
+    accum[param.in].push(param)
+    return accum
+  }, {})
+
   const errors: any = new OpenAPIRequestValidator({ parameters }).validateRequest(requestParameters);
- 
+
   if (errors) {
     debug('errors:', errors.errors.map((error: any) => `${error.message}; missing from ${error.location}`));
     return false;
