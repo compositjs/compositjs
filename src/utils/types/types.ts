@@ -30,8 +30,7 @@ export interface IApplicationConfiguration {
  * Service type
  */
 export interface IService {
-
-  execute(context: Context): Promise<void>
+  execute(context: Context, routeServiceConfig?: any): Promise<void>
 }
 
 /**

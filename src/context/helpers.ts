@@ -1,8 +1,8 @@
-import { Context } from '@loopback/context';
 import cookie from 'cookie';
 import debugFactory from 'debug';
+import { get } from 'lodash';
 import setCookie from 'set-cookie-parser';
-import { CONTEXT_PREFIX } from '../utils';
+import { CONTEXT_PREFIX, IRequestContext } from '../utils';
 
 const debug = debugFactory('compositjs:context:utils');
 
@@ -23,16 +23,24 @@ const parseCookie = (headers: any) => {
  * @param {object} ctx Context
  * @param {string} svcKeyPre Service key prefix
  */
-export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPrefix: any) {
+export function extractHeadersAndCookies(headers: any): any {
   // Setting up headers to context
-  Object.keys(headers).forEach((key) => {
-    if (key === 'cookie') return; // Not setting cookie with his loop
-    ctx.bind(`${svcKeyPrefix}.headers.${key}`).to(headers[key]).tag(svcKeyPrefix);
-  });
+  const h: any = {}
+  for (const key in headers) {
+    if (key === 'cookie') {
+      continue;
+    }
+    h[key] = headers[key]
+  }
 
   // Setting up cookies to context
   const cookies = parseCookie(headers);
-  Object.keys(cookies).forEach((key) => ctx.bind(`${svcKeyPrefix}.cookie.${key}`).to(cookies[key]));
+  const c: any = {}
+  for (const key in cookies) {
+    c[key] = cookies[key]
+  }
+
+  return { cookies: c, headers: h }
 }
 
 /**
@@ -59,27 +67,32 @@ export function bindHeadersToContext(headers: any, ctx: Context, svcKeyPrefix: a
  * @param {object} params
  * @param {object} context
  */
-export function getParamsFromContext(params: any, context: Context) {
+export function getParamsFromContext(params: any, context: IRequestContext) {
   const result: any = {};
 
   if (!params) return result;
 
   // If params type is a string and which is able to accessing directly from context
   if (params && typeof params === 'string' && params.substring(0, 2) === CONTEXT_PREFIX) {
-    return context.getSync(params.replace(CONTEXT_PREFIX, ''));
+    const paramKeys: string[] = params.split('.')
+    const contextValue = context.getSync(paramKeys[1]);
+    return get(contextValue, paramKeys.splice(2, paramKeys.length).join('.'), '');
   }
 
-  Object.keys(params).forEach((paramkey: any) => {
+  for (const paramkey in params) {
     const parameter: any = params[paramkey];
     try {
-      const value = parameter.value || parameter;
+      const value: string = parameter.value || parameter;
       if (typeof value !== 'string') {
         throw new Error(`${paramkey} parameter not defined properly.`);
       }
 
       // If value accessing from context variable then start with `$.`
       if (value && value.substring(0, 2) === CONTEXT_PREFIX) {
-        result[`${paramkey}`] = context.getSync(value.replace(CONTEXT_PREFIX, ''));
+        const paramKeys: string[] = value.split('.')
+        const contextValue = context.getSync(paramKeys[1]);
+        const valKey = paramKeys.splice(2, paramKeys.length).join('.')
+        result[`${paramkey}`] = get(contextValue, valKey, '')
       } else {
         result[`${paramkey}`] = value;
       }
@@ -91,7 +104,7 @@ export function getParamsFromContext(params: any, context: Context) {
     if (!result[`${paramkey}`] && parameter.required) {
       throw new Error(`Parameter "${paramkey}" not found.`);
     }
-  });
+  }
 
   return result;
 }

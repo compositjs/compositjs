@@ -1,5 +1,6 @@
 
 import { BindingScope, Constructor, Context } from '@loopback/context';
+import Confidence from 'confidence';
 import debugFactory from 'debug';
 import { RestService } from '../services';
 import { IApplicationConfiguration, IService } from '../utils';
@@ -33,7 +34,7 @@ const getDefaultConfigs = (appRootDir: string): IApplicationConfiguration => ({
   },
 });
 
-export default class Application extends Context {
+export class Application extends Context {
   plugins: any;
 
   appConfig: IApplicationConfiguration;
@@ -65,10 +66,14 @@ export default class Application extends Context {
     // Loading all plugins
     this.plugins = {
       env: this.appConfig.enviornment || process.env.NODE_ENV || 'development',
-      services: ConfigLoader.loadPlugins(this.appConfig.services) || [],
-      routes: ConfigLoader.loadPlugins(this.appConfig.routes) || [],
-      middlewares: ConfigLoader.loadPlugins(this.appConfig.middlewares) || [],
+      services: [],
+      routes: [],
+      middlewares: [],
     };
+
+    ConfigLoader.loadPlugins(this.appConfig.services, this.plugins.services);
+    ConfigLoader.loadPlugins(this.appConfig.routes, this.plugins.routes);
+    ConfigLoader.loadPlugins(this.appConfig.middlewares, this.plugins.middlewares)
 
     debug('plugins:', this.plugins);
   }
@@ -117,29 +122,30 @@ export default class Application extends Context {
   boot() {
     // Register services first to accessing while route registration
     if (this.plugins.services) {
-      Object.values(this.plugins.services).forEach((serviceSpec: any) => {
-        this.configure(`service.${serviceSpec.info.name}`).to(serviceSpec).lock();
-        const Service: Constructor<IService> = this.getSync(`service.${serviceSpec.service.type}`);
-        this.bind(`service.${serviceSpec.info.name}`).toClass(Service).lock();
+      Object.values(this.plugins.services).forEach((serviceConfig: any) => {
+        const sc = new Confidence.Store(serviceConfig).get('/')
+        this.configure(`service.${serviceConfig.info.name}`).to(sc).lock();
+        const Service: Constructor<IService> = this.getSync(`service.${serviceConfig.service.type}`);
+        this.bind(`service.${serviceConfig.info.name}`).toClass(Service).inScope(BindingScope.SINGLETON).lock();
       });
     }
 
     if (this.plugins.routes) {
-      Object.values(this.plugins.routes).forEach((route: any) => {
-        this.bind(`route.${route.info.name}`).to(route).lock();
+      Object.values(this.plugins.routes).forEach((routeConfig: any) => {
+        const rc = new Confidence.Store(routeConfig).get('/')
+        this.bind(`route.${routeConfig.info.name}`).to(rc).lock();
       });
     }
 
     if (this.plugins.middlewares) {
       Object.keys(this.plugins.middlewares).forEach((key: any) => {
+        console.log(this.plugins.middlewares[key])
         this
           .bind(`${ApplicationBindings.MIDDLEWARES}.${key}`)
           .to(this.plugins.middlewares[key])
-          .tag(`${ApplicationBindings.MIDDLEWARES}`)
+          .tag(ApplicationBindings.MIDDLEWARES)
           .lock();
       });
     }
   }
 }
-
-module.exports = Application;

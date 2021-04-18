@@ -26,8 +26,7 @@ function mergeSingleItemOrProperty(target: any, config: any, key: any, fullKey: 
   const newValue = config[key];
 
   if (!hasCompatibleType(origValue, newValue)) {
-    return `Cannot merge values of incompatible types for the option \`${
-      fullKey}\`.`;
+    return `Cannot merge values of incompatible types for the option \`${fullKey}\`.`;
   }
 
   if (Array.isArray(origValue)) {
@@ -159,10 +158,12 @@ function mergeConfig(target: any, config: any, fileName: any) {
 
 ConfigLoder.loadAppConfig = (configRootDir: any) => load(configRootDir, 'config', mergeConfig);
 
-ConfigLoder.loadPlugins = (options: any = {}) => {
-  const plugins: any = [];
+ConfigLoder.loadPlugins = (options: any = {}, plugins: any = []) => {
   const pluginFiles = fs.existsSync(options.dir) ? fs.readdirSync(options.dir) : [];
   pluginFiles.filter((file: any) => {
+    if (fs.lstatSync(`${options.dir}${file}`).isDirectory()) {
+      ConfigLoder.loadPlugins({ ...options, dir: `${options.dir}${file}/` }, plugins)
+    }
     // Finding *.js file from middlewares Directory
     if (file.match(`^(.*)${options.extension}`)) {
       // Removing file extension to find in folder
