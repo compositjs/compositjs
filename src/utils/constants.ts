@@ -10,7 +10,7 @@ export namespace RouteBindings {
 }
 
 export namespace RequestBindings {
-  export const REQUEST_PARAMS = 'request.params'
+  export const REQUEST_PARAMS = 'request'
   export const REQUEST_TAG_NAME = 'request'
 }
 

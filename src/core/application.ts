@@ -66,10 +66,14 @@ export class Application extends Context {
     // Loading all plugins
     this.plugins = {
       env: this.appConfig.enviornment || process.env.NODE_ENV || 'development',
-      services: ConfigLoader.loadPlugins(this.appConfig.services) || [],
-      routes: ConfigLoader.loadPlugins(this.appConfig.routes) || [],
-      middlewares: ConfigLoader.loadPlugins(this.appConfig.middlewares) || [],
+      services: [],
+      routes: [],
+      middlewares: [],
     };
+
+    ConfigLoader.loadPlugins(this.appConfig.services, this.plugins.services);
+    ConfigLoader.loadPlugins(this.appConfig.routes, this.plugins.routes);
+    ConfigLoader.loadPlugins(this.appConfig.middlewares, this.plugins.middlewares)
 
     debug('plugins:', this.plugins);
   }

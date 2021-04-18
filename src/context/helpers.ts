@@ -91,7 +91,8 @@ export function getParamsFromContext(params: any, context: IRequestContext) {
       if (value && value.substring(0, 2) === CONTEXT_PREFIX) {
         const paramKeys: string[] = value.split('.')
         const contextValue = context.getSync(paramKeys[1]);
-        result[`${paramkey}`] = get(contextValue, paramKeys.splice(2, paramKeys.length).join('.'), '')
+        const valKey = paramKeys.splice(2, paramKeys.length).join('.')
+        result[`${paramkey}`] = get(contextValue, valKey, '')
       } else {
         result[`${paramkey}`] = value;
       }

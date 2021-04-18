@@ -25,7 +25,7 @@ const buildResponse = (context: IRequestContext, response: any) => {
   const newCookies: any = [];
   const cookieparams = getParamsFromContext(output.cookies, context);
   for (const cookiename in cookieparams) {
-    newCookies.push(cookie.serialize(cookiename, cookieparams[cookiename], cookieparams[cookiename]))
+    newCookies.push(cookie.serialize(cookiename, cookieparams[cookiename].value || cookieparams[cookiename], cookieparams[cookiename]))
   }
 
   if (newCookies.length > 0) {
@@ -46,7 +46,6 @@ const buildResponse = (context: IRequestContext, response: any) => {
     outputServices.map((service: string) => {
       try {
         serviceResponse = context.getSync(service)
-        console.log(service, serviceResponse)
         compositBody[service] = serviceResponse.body
       } catch (err) {
         console.log('err', service)
@@ -106,7 +105,7 @@ const processService = async (serviceConfig: any, context: IRequestContext, ac: 
       if (serviceResponse.body.constructor.name === "RequestResponse") {
         serviceResponse.body.setEncoding('utf8')
         for await (const data of serviceResponse.body) {
-          body = data;
+          body += data;
         }
 
         // If headers accept defined, and it is JSON then parse the body
@@ -178,7 +177,7 @@ export default class HTTPRequestHandler {
 
         // Binding path parameters with current request context
         const requestParams: any = requestContext.getSync(RequestBindings.REQUEST_PARAMS)
-        requestParams.params = route.pathParams
+        requestParams.params.pathParams = route.pathParams
         requestContext.bind(RequestBindings.REQUEST_PARAMS).to(requestParams).tag(RequestBindings.REQUEST_TAG_NAME);
 
         serviceView.on("bind", async () => {

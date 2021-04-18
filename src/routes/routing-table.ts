@@ -2,7 +2,7 @@
 import debugFactory from 'debug';
 import { omit } from 'lodash';
 import NodeCache from 'node-cache';
-import { IRequestContext } from '../utils';
+import { IRequestContext, RequestBindings } from '../utils';
 import { convertPathToRegexp } from './utils/path';
 const debug = debugFactory('compositjs:routing-table');
 
@@ -32,7 +32,7 @@ export default class RoutingTable {
   _cache: any = new NodeCache();
 
   find(requestContext: IRequestContext) {
-    const requestParams: any = requestContext.getSync('request')
+    const requestParams: any = requestContext.getSync(RequestBindings.REQUEST_PARAMS)
     const reqPath = requestParams.params.path;
     const reqMethod = requestParams.params.method;
     // const query = requestParams.params.query;

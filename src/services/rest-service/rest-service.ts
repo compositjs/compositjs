@@ -19,7 +19,7 @@ const resolveRequestConfigurations = (spec: any, context: IRequestContext) => {
 
   const config: any = {
     options: {
-      method: serviceRequest.method,
+      method: serviceRequest.method.toUpperCase(),
       headers,
       followRedirect: false,
     },
@@ -50,6 +50,16 @@ const resolveRequestConfigurations = (spec: any, context: IRequestContext) => {
     config.options.path = path;
     config.options.host = host;
     config.url = `${host}${path}`;
+  }
+
+  if (serviceRequest.parameters?.body) {
+    const body: any = {}
+    const bodyParams = serviceRequest.parameters.body
+    for (const bodyParam in bodyParams) {
+      body[bodyParam] = getParamsFromContext(bodyParams[bodyParam], context);
+    }
+
+    config.options.body = JSON.stringify(body)
   }
 
   debug('Request config:', config);

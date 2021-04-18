@@ -4,6 +4,7 @@ import debugFactory from 'debug';
 import http from 'http';
 import https from 'https';
 import Koa from 'koa';
+import bodyParser from 'koa-bodyparser';
 import { ApplicationBindings, IApplicationConfiguration, IServerConfiguration } from '../utils';
 
 const debug = debugFactory('compositjs:server');
@@ -62,6 +63,8 @@ export default class Server {
   async setupRequestHandler() {
     // Initializing default request listener
     this._listener = new Koa();
+
+    this._listener.use(bodyParser());
 
     this._listener.use(await this.composeMiddlewares());
 
