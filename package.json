@@ -1,6 +1,6 @@
 {
   "name": "compositjs",
-  "version": "0.1.4-beta.0.0.2",
+  "version": "0.1.4-beta.0.0.3",
   "description": "Composing services",
   "author": "rahulrkr@hotmail.com",
   "main": "index.js",
