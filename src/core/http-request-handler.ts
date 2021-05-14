@@ -25,7 +25,12 @@ const buildResponse = (context: IRequestContext, response: any) => {
   const newCookies: any = [];
   const cookieparams = getParamsFromContext(output.cookies, context);
   for (const cookiename in cookieparams) {
-    newCookies.push(cookie.serialize(cookiename, cookieparams[cookiename].value || cookieparams[cookiename], cookieparams[cookiename]))
+    if (
+      (typeof cookieparams[cookiename] === 'string' && cookieparams[cookiename] != '') ||
+      cookieparams[cookiename].value != undefined
+    ) {
+      newCookies.push(cookie.serialize(cookiename, cookieparams[cookiename].value || cookieparams[cookiename], cookieparams[cookiename]))
+    }
   }
 
   if (newCookies.length > 0) {
@@ -169,9 +174,9 @@ export default class HTTPRequestHandler {
 
       // Finding route
       const route: any = this.routingTable.find(requestContext);
-      requestContext.bind(RouteBindings.ROUTE_OUTPUT).to(route.output);
 
       if (route) {
+        requestContext.bind(RouteBindings.ROUTE_OUTPUT).to(route.output);
         const nonDependedServices: object[] = route.services.filter((service: any) => !service.dependsOn)
         const dependedServices: object[] = route.services.filter((service: any) => service.dependsOn)
 
