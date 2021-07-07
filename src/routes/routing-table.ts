@@ -44,7 +44,8 @@ export default class RoutingTable {
         debug('find: route:', route.info.name);
 
         // Validating method e.g. GET, POST etc
-        if (route.method.toLowerCase() !== reqMethod) {
+        const routeMethods = route.method.split('|').map((method: string) => method.toLowerCase())
+        if (!routeMethods.includes(reqMethod)) {
           debug('find: method-validation:', false);
           return false;
         }

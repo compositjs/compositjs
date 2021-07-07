@@ -16,10 +16,10 @@ const resolveRequestConfigurations = (spec: any, context: IRequestContext) => {
   const serviceRequest: IServiceRequestConfig = service.request;
 
   const headers = getParamsFromContext(serviceRequest.headers, context);
-
+  const method: string = getParamsFromContext(serviceRequest.method, context);
   const config: any = {
     options: {
-      method: serviceRequest.method.toUpperCase(),
+      method: method.toUpperCase(),
       headers,
       followRedirect: false,
     },
