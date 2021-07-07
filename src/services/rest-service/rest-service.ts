@@ -53,13 +53,7 @@ const resolveRequestConfigurations = (spec: any, context: IRequestContext) => {
   }
 
   if (serviceRequest.parameters?.body) {
-    const body: any = {}
-    const bodyParams = serviceRequest.parameters.body
-    for (const bodyParam in bodyParams) {
-      body[bodyParam] = getParamsFromContext(bodyParams[bodyParam], context);
-    }
-
-    config.options.body = JSON.stringify(body)
+    config.options.body = JSON.stringify(getParamsFromContext(serviceRequest.parameters.body, context))
   }
 
   debug('Request config:', config);

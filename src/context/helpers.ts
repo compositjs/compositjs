@@ -73,10 +73,14 @@ export function getParamsFromContext(params: any, context: IRequestContext) {
   if (!params) return result;
 
   // If params type is a string and which is able to accessing directly from context
-  if (params && typeof params === 'string' && params.substring(0, 2) === CONTEXT_PREFIX) {
-    const paramKeys: string[] = params.split('.')
-    const contextValue = context.getSync(paramKeys[1]);
-    return get(contextValue, paramKeys.splice(2, paramKeys.length).join('.'), '');
+  if (params && typeof params === 'string') {
+    if (params.substring(0, 2) === CONTEXT_PREFIX) {
+      const paramKeys: string[] = params.split('.')
+      const contextValue = context.getSync(paramKeys[1]);
+      return get(contextValue, paramKeys.splice(2, paramKeys.length).join('.'), '');
+    } else {
+      return params;
+    }
   }
 
   for (const paramkey in params) {
